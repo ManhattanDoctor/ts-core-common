@@ -73,11 +73,9 @@ export class TransportHttp extends Transport<ITransportHttpSettings> {
     }
 
     public complete<U, V>(command: ITransportCommand<U>, result?: V | Error): void {
-        if (!this.isCommandAsync(command)) {
-            this.logCommand(command, TransportLogType.RESPONSE_NO_REPLY);
-            return;
+        if (this.isCommandAsync(command)) {
+            command.response(result);
         }
-        command.response(result);
         this.responseSend(command);
     }
 
@@ -170,7 +168,12 @@ export class TransportHttp extends Transport<ITransportHttpSettings> {
         this.complete(command, this.isError(result) ? this.parseError(result, command) : result);
     }
 
-    protected responseSend<U, V>(command: ITransportCommandAsync<U, V>): void {
+    protected responseSend<U>(command: ITransportCommand<U>): void {
+        if (!this.isCommandAsync(command)) {
+            this.logCommand(command, TransportLogType.RESPONSE_NO_REPLY);
+            this.observer.next(new ObservableData(LoadableEvent.FINISHED, command));
+            return;
+        }
         // Immediately receive the commad
         this.responseReceived(command);
     }
