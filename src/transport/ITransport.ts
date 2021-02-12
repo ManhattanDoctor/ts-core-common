@@ -46,6 +46,7 @@ export enum TransportCommandWaitDelay {
 }
 
 export interface ITransportEvent<T> extends ITraceable {
+    readonly uid: string;
     readonly name: string;
     readonly data?: T;
 }
