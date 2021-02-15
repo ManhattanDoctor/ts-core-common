@@ -26,10 +26,9 @@ export class TransportEvent<T> implements ITransportEvent<T> {
     //
     // --------------------------------------------------------------------------
 
-    constructor(name: string, data?: T) {
-        this.uid = uuid();
+    constructor(name: string, data?: T, uid?: string) {
+        this.uid = !_.isNil(uid) ? uid : uuid();
         this.name = name;
-
         if (!_.isNil(data)) {
             this.data = this.validateData(data);
         }
