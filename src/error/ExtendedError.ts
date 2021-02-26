@@ -57,7 +57,7 @@ export class ExtendedError<T = any> extends Error implements Error {
 
         let message = item.message;
         if (!_.isEmpty(item.name)) {
-            message = `[${item.name}'] ${message}`;
+            message = `[${item.name}] ${message}`;
         }
 
         return new ExtendedError(message, !_.isNil(code) ? code : ExtendedError.DEFAULT_ERROR_CODE, item.stack);
@@ -113,6 +113,10 @@ export class ExtendedError<T = any> extends Error implements Error {
     //  Public Methods
     //
     // --------------------------------------------------------------------------
+
+    public toObject(): any {
+        return TransformUtil.fromClass(this);
+    }
 
     public toString(): string {
         let value = this.message;
