@@ -68,8 +68,8 @@ export abstract class FilterableDataSourceMapCollection<U, V = any> extends Data
         return item;
     }
 
-    protected createConditionsExtrasForRequest(conditionsExtra: any): any {
-        return !_.isEmpty(conditionsExtra) ? _.cloneDeep(conditionsExtra) : null;
+    protected createConditionsExtrasForRequest(conditions: any): any {
+        return this.createConditionsForRequest(conditions);
     }
 
     // --------------------------------------------------------------------------

@@ -176,25 +176,25 @@ export const ParseFilterableCondition = <T, P extends keyof T>(
 };
 
 export const ParseFilterableConditionExtra = (
-    conditionsExtras: any,
+    conditions: any,
     name: string,
-    value: any,
     type: FilterableDataType,
     defaultCondition: FilterableConditionType = FilterableConditionType.EQUAL,
     transform?: (value: any, conditions: any, name: string) => string
 ): void => {
-    if (_.isEmpty(conditionsExtras) || _.isNil(name)) {
+    if (_.isEmpty(conditions) || _.isNil(name)) {
         return;
     }
 
+    let value: any = conditions[name];
     if (!_.isNil(value)) {
-        value = !_.isNil(transform) ? transform(value, conditionsExtras, name) : value.toString();
+        value = !_.isNil(transform) ? transform(value, conditions, name) : value.toString();
     }
 
     let item = ToFilterableCondition(value, type, defaultCondition);
     if (!_.isNil(item)) {
-        conditionsExtras[name] = item;
+        conditions[name] = item;
     } else {
-        delete conditionsExtras[name];
+        delete conditions[name];
     }
 };
