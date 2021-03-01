@@ -18,6 +18,9 @@ export class Filterable<U> implements IFilterable<U> {
         if (!_.isNil(item.conditions)) {
             item.conditions = Filterable.parse(item.conditions, Filterable.transformCondition);
         }
+        if (!_.isNil(item.conditionsExtras)) {
+            item.conditionsExtras = Filterable.parse(item.conditionsExtras, Filterable.transformCondition);
+        }
         if (!_.isNil(item.sort)) {
             item.sort = Filterable.parse(item.sort, Filterable.transformSort);
         }

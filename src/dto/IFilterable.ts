@@ -37,7 +37,7 @@ export enum FilterableDataType {
 export interface IFilterable<U> extends ITraceable {
     sort?: FilterableSort<U>;
     conditions?: FilterableConditions<U>;
-    conditionsExtras?: any;
+    conditionsExtras?: FilterableConditions<any>;
 }
 
 export interface IFilterableCondition<T = any> {
@@ -55,6 +55,7 @@ export type IFilterableConditionValue<T = any, P extends keyof T = any> = T[P] |
 // --------------------------------------------------------------------------
 
 export type FilterableSort<T> = { [P in keyof T]?: boolean };
+
 export type FilterableConditions<T> = {
     [P in keyof T]?: T[P] | Array<T[P]> | IFilterableCondition<T>;
 };
@@ -69,7 +70,11 @@ export const IsFilterableCondition = <T>(value: any): value is IFilterableCondit
     return ObjectUtil.instanceOf(value, ['condition', 'value']);
 };
 
-export const IsHasFilterableCondition = <T, P extends keyof T>(conditions: FilterableConditions<T>, name: P, value: IFilterableConditionValue<T>): boolean => {
+export const IsHasFilterableCondition = <T = any, P extends keyof T = any>(
+    conditions: FilterableConditions<T>,
+    name: P,
+    value: IFilterableConditionValue<T>
+): boolean => {
     if (_.isNil(conditions) || !ObjectUtil.hasOwnProperty(conditions, name)) {
         return false;
     }
