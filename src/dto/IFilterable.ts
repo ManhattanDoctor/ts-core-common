@@ -157,7 +157,7 @@ export const ParseFilterableCondition = <T, P extends keyof T>(
     name: P,
     type: FilterableDataType,
     defaultCondition: FilterableConditionType = FilterableConditionType.EQUAL,
-    transform?: (item: T[P], conditions: FilterableConditions<T>, name: P) => string
+    transform?: (value: T[P], conditions: FilterableConditions<T>, name: P) => string
 ): void => {
     if (_.isEmpty(conditions) || _.isNil(name) || !ObjectUtil.hasOwnProperty(conditions, name)) {
         return;
@@ -172,5 +172,29 @@ export const ParseFilterableCondition = <T, P extends keyof T>(
         conditions[name] = item;
     } else {
         delete conditions[name];
+    }
+};
+
+export const ParseFilterableConditionExtra = (
+    conditionsExtras: any,
+    name: string,
+    value: any,
+    type: FilterableDataType,
+    defaultCondition: FilterableConditionType = FilterableConditionType.EQUAL,
+    transform?: (value: any, conditions: any, name: string) => string
+): void => {
+    if (_.isEmpty(conditionsExtras) || _.isNil(name)) {
+        return;
+    }
+
+    if (!_.isNil(value)) {
+        value = !_.isNil(transform) ? transform(value, conditionsExtras, name) : value.toString();
+    }
+
+    let item = ToFilterableCondition(value, type, defaultCondition);
+    if (!_.isNil(item)) {
+        conditionsExtras[name] = item;
+    } else {
+        delete conditionsExtras[name];
     }
 };
