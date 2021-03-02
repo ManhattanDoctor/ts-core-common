@@ -103,8 +103,11 @@ export class Filterable<U> implements IFilterable<U> {
     // --------------------------------------------------------------------------
 
     @IsOptional()
+    sort?: FilterableSort<U>;
+
+    @IsOptional()
     conditions?: FilterableConditions<U>;
 
     @IsOptional()
-    sort?: FilterableSort<U>;
+    conditionsExtras?: FilterableConditions<any>;
 }
