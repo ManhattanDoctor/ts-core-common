@@ -15,17 +15,38 @@ export class Filterable<U> implements IFilterable<U> {
         if (_.isNil(item)) {
             return item;
         }
+        TraceUtil.addIfNeed(item);
+        if (!_.isNil(item.sort)) {
+            item.sort = Filterable.parse(item.sort, Filterable.transformSort);
+        }
         if (!_.isNil(item.conditions)) {
             item.conditions = Filterable.parse(item.conditions, Filterable.transformCondition);
         }
         if (!_.isNil(item.conditionsExtras)) {
             item.conditionsExtras = Filterable.parse(item.conditionsExtras, Filterable.transformCondition);
         }
-        if (!_.isNil(item.sort)) {
-            item.sort = Filterable.parse(item.sort, Filterable.transformSort);
-        }
-        TraceUtil.addIfNeed(item);
         return item;
+    }
+
+    public static check(value: any): any {
+        if (_.isEmpty(value)) {
+            return value;
+        }
+        if (_.isString(value)) {
+            value = Filterable.check(JSON.parse(value));
+        }
+        return value;
+    }
+
+    public static parse(value: any, transform: (item: any, key: string, value: any) => void): any {
+        value = Filterable.check(value);
+        if (_.isNil(value)) {
+            return value;
+        }
+        for (let pair of Object.entries(value)) {
+            transform(value, pair[0], pair[1]);
+        }
+        return value;
     }
 
     public static isValueInvalid(value: any): boolean {
@@ -43,27 +64,6 @@ export class Filterable<U> implements IFilterable<U> {
     //  Transform Methods
     //
     // --------------------------------------------------------------------------
-
-    private static check(value: any): any {
-        if (_.isEmpty(value)) {
-            return value;
-        }
-        if (_.isString(value)) {
-            value = Filterable.check(JSON.parse(value));
-        }
-        return value;
-    }
-
-    private static parse(value: any, transform: (item: any, key: string, value: any) => void): any {
-        value = Filterable.check(value);
-        if (_.isNil(value)) {
-            return value;
-        }
-        for (let pair of Object.entries(value)) {
-            transform(value, pair[0], pair[1]);
-        }
-        return value;
-    }
 
     public static transformCondition(item: any, key: string, value: any): void {
         if (IsFilterableCondition(value)) {
