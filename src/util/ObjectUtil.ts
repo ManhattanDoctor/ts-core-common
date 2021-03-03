@@ -102,13 +102,31 @@ export class ObjectUtil {
             includeKeys = ObjectUtil.keys(from);
         }
         if (!_.isEmpty(excludeKeys)) {
-            includeKeys = includeKeys.filter(key => !excludeKeys.includes(key));
+            includeKeys = _.pull(includeKeys, ...excludeKeys);
         }
 
         for (let key of includeKeys) {
             try {
                 to[key] = from[key];
             } catch (error) {}
+        }
+        return to;
+    }
+
+    public static copyPartial<U, V extends keyof U>(from: Partial<U>, to: U, includeKeys?: Array<V>, excludeKeys?: Array<V>): any {
+        if (_.isNil(from) || _.isNil(to)) {
+            return null;
+        }
+
+        let allKeys = ObjectUtil.keys(from) as Array<V>;
+        includeKeys = _.isEmpty(includeKeys) ? allKeys : _.intersection(includeKeys, ObjectUtil.keys(from));
+
+        if (!_.isEmpty(excludeKeys)) {
+            includeKeys = _.pull(includeKeys, ...excludeKeys);
+        }
+
+        for (let key of includeKeys) {
+            to[key] = from[key];
         }
         return to;
     }
