@@ -128,6 +128,7 @@ export class ObjectUtil {
         for (let key of includeKeys) {
             to[key] = from[key];
         }
+        
         return to;
     }
 
