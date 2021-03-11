@@ -23,7 +23,7 @@ export abstract class AbstractSettingsStorage {
     //
     // --------------------------------------------------------------------------
 
-    protected data: any;
+    protected _data: any;
 
     // --------------------------------------------------------------------------
     //
@@ -32,7 +32,7 @@ export abstract class AbstractSettingsStorage {
     // --------------------------------------------------------------------------
 
     protected constructor(data?: any) {
-        this.data = data || {};
+        this._data = !_.isNil(data) ? data : {};
     }
 
     // --------------------------------------------------------------------------
@@ -42,7 +42,7 @@ export abstract class AbstractSettingsStorage {
     // --------------------------------------------------------------------------
 
     protected getValue<T>(name: string, defaultValue?: T): T {
-        let value = this.getPrefferedValue(name);
+        let value = this.getPreferredValue(name);
         if (_.isNil(value) && ObjectUtil.hasOwnProperty(this.data, name)) {
             value = this.data[name];
         }
@@ -52,7 +52,7 @@ export abstract class AbstractSettingsStorage {
         return this.parseValue(value, defaultValue);
     }
 
-    protected getPrefferedValue<T>(name: string): T {
+    protected getPreferredValue<T>(name: string): T {
         return null;
     }
 
@@ -79,5 +79,15 @@ export abstract class AbstractSettingsStorage {
 
     public async validate(logger: ILogger): Promise<boolean> {
         return true;
+    }
+
+    // --------------------------------------------------------------------------
+    //
+    //  Public Properties
+    //
+    // --------------------------------------------------------------------------
+
+    public get data(): any {
+        return this._data;
     }
 }
