@@ -12,11 +12,11 @@ export abstract class SequenceExecutor<U, V> extends Loadable<LoadableEvent, Seq
     //
     // --------------------------------------------------------------------------
 
-    public timeout: number = NaN;
+    public timeout: number;
 
     protected inputs: Array<U>;
-    protected timeoutTimer: any;
     protected logger: ILogger;
+    protected timeoutTimer: any;
 
     private index: number = NaN;
 
@@ -31,9 +31,11 @@ export abstract class SequenceExecutor<U, V> extends Loadable<LoadableEvent, Seq
     //
     // --------------------------------------------------------------------------
 
-    constructor(logger?: ILogger) {
+    constructor(logger?: ILogger, timeout?: number) {
         super();
         this.logger = logger;
+        this.timeout = timeout;
+
         this.inputs = [];
     }
 
@@ -83,7 +85,7 @@ export abstract class SequenceExecutor<U, V> extends Loadable<LoadableEvent, Seq
         this.observer.next(new ObservableData(LoadableEvent.STARTED));
 
         clearTimeout(this.timeoutTimer);
-        if (!_.isNaN(this.timeout) && this.timeout > 0) {
+        if (!_.isNaN(Number(this.timeout)) && this.timeout > 0) {
             this.timeoutTimer = setTimeout(() => this.timeoutExpired(), this.timeout);
         }
 
