@@ -1,1 +1,1 @@
-export * from './SequienceExecutor';
+export * from './SequenceExecutor';

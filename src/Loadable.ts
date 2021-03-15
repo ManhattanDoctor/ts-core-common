@@ -13,7 +13,7 @@ export abstract class Loadable<U = any, V = any> extends DestroyableContainer {
     // --------------------------------------------------------------------------
 
     protected _status: LoadableStatus;
-    protected observer: Subject<ObservableData<U | LoadableEvent, V>>;
+    protected observer: Subject<ObservableData<U | LoadableEvent, V | ILoadableStatusChangeData>>;
 
     // --------------------------------------------------------------------------
     //
@@ -34,12 +34,9 @@ export abstract class Loadable<U = any, V = any> extends DestroyableContainer {
     // --------------------------------------------------------------------------
 
     protected commitStatusChangedProperties(oldStatus: LoadableStatus, newStatus: LoadableStatus): void {
-        this.observer.next(
-            new ObservableData(LoadableEvent.STATUS_CHANGED, {
-                oldStatus,
-                newStatus
-            } as any)
-        );
+        if (!_.isNil(this.observer)) {
+            this.observer.next(new ObservableData(LoadableEvent.STATUS_CHANGED, { oldStatus, newStatus }));
+        }
     }
 
     // --------------------------------------------------------------------------
@@ -82,7 +79,7 @@ export abstract class Loadable<U = any, V = any> extends DestroyableContainer {
     //
     // --------------------------------------------------------------------------
 
-    public get events(): Observable<ObservableData<U | LoadableEvent, V>> {
+    public get events(): Observable<ObservableData<U | LoadableEvent, V | ILoadableStatusChangeData>> {
         return this.observer.asObservable();
     }
 
