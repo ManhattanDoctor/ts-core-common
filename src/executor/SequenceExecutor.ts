@@ -1,5 +1,6 @@
 import * as _ from 'lodash';
 import { Loadable, LoadableEvent, LoadableStatus } from '../Loadable';
+import { ILogger } from '../logger';
 import { ObservableData } from '../observer';
 import { PromiseHandler } from '../promise';
 import { ArrayUtil } from '../util';
@@ -12,8 +13,10 @@ export abstract class SequenceExecutor<U, V> extends Loadable<LoadableEvent, Seq
     // --------------------------------------------------------------------------
 
     public timeout: number = NaN;
-    protected timeoutTimer: any;
+
     protected inputs: Array<U>;
+    protected timeoutTimer: any;
+    protected logger: ILogger;
 
     private index: number = NaN;
 
@@ -28,8 +31,9 @@ export abstract class SequenceExecutor<U, V> extends Loadable<LoadableEvent, Seq
     //
     // --------------------------------------------------------------------------
 
-    constructor() {
+    constructor(logger?: ILogger) {
         super();
+        this.logger = logger;
         this.inputs = [];
     }
 
