@@ -9,7 +9,7 @@ export class Destroyable implements IDestroyable {
     //
     // --------------------------------------------------------------------------
 
-    private _destroyed: Subject<any>;
+    private _destroyed: Subject<void>;
     private _isDestroyed: boolean;
 
     // --------------------------------------------------------------------------
@@ -51,7 +51,7 @@ export class Destroyable implements IDestroyable {
     //
     // --------------------------------------------------------------------------
 
-    public get destroyed(): Observable<any> {
+    public get destroyed(): Observable<void> {
         return !_.isNil(this._destroyed) ? this._destroyed.asObservable() : null;
     }
 
