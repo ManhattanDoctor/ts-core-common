@@ -190,9 +190,6 @@ export class TransportHttp extends Transport<ITransportHttpSettings> {
         if (_.isNil(this.settings.method)) {
             throw new ExtendedError(`Defaults method is undefined`);
         }
-        if (_.isNil(this.settings.baseURL)) {
-            throw new ExtendedError(`Defaults baseUrl is undefined`);
-        }
 
         let request = command.request as ITransportHttpRequest;
         request.timeout = options.timeout;
