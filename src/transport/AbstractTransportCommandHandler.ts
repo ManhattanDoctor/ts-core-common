@@ -2,6 +2,7 @@ import { ExtendedError } from '../error';
 import { ILogger, LoggerWrapper } from '../logger';
 import { TransportWaitError } from './error/TransportWaitError';
 import { ITransport, ITransportCommand } from './ITransport';
+import * as _ from 'lodash';
 
 export abstract class AbstractTransportCommandHandler<U, T extends ITransportCommand<U>> extends LoggerWrapper {
     // --------------------------------------------------------------------------
@@ -28,6 +29,9 @@ export abstract class AbstractTransportCommandHandler<U, T extends ITransportCom
         if (error instanceof TransportWaitError) {
             this.transport.wait(command);
             return;
+        }
+        if (_.isNil(error)) {
+            error = new ExtendedError(`Undefined error`);
         }
         this.transport.complete(command, error);
         this.error(error, ExtendedError.instanceOf(error) && !error.isFatal ? '' : error.stack);
