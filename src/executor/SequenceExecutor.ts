@@ -45,6 +45,18 @@ export abstract class SequenceExecutor<U, V> extends Loadable<LoadableEvent, Seq
     //
     // --------------------------------------------------------------------------
 
+    protected completeInput(input: U, output: V): void {
+        if (!this.isDestroyed) {
+            this.observer.next(new ObservableData(LoadableEvent.COMPLETE, { input, output }));
+        }
+    }
+
+    protected errorInput(input: U, error: Error): void {
+        if (!this.isDestroyed) {
+            this.observer.next(new ObservableData(LoadableEvent.ERROR, { input, error }));
+        }
+    }
+
     protected finishedInput(input: U): void {
         if (this.isDestroyed) {
             return;
@@ -67,7 +79,6 @@ export abstract class SequenceExecutor<U, V> extends Loadable<LoadableEvent, Seq
         if (this.isDestroyed) {
             return;
         }
-
         this.nextIndex();
         this.nextInput();
     }
@@ -81,6 +92,10 @@ export abstract class SequenceExecutor<U, V> extends Loadable<LoadableEvent, Seq
     }
 
     protected makeStarted(): void {
+        if (this.isDestroyed) {
+            return;
+        }
+
         this.status = LoadableStatus.LOADING;
         this.observer.next(new ObservableData(LoadableEvent.STARTED));
 
@@ -94,6 +109,10 @@ export abstract class SequenceExecutor<U, V> extends Loadable<LoadableEvent, Seq
     }
 
     protected makeFinished(error?: string): void {
+        if (this.isDestroyed) {
+            return;
+        }
+
         this.index = 0;
         this.totalIndex = 0;
         this.totalLength = 0;
@@ -135,15 +154,15 @@ export abstract class SequenceExecutor<U, V> extends Loadable<LoadableEvent, Seq
     protected nextInput(): void {
         let input = this.inputs[this.index];
         this.executeInput(input).then(
-            data => {
-                this.observer.next(new ObservableData(LoadableEvent.COMPLETE, { input, output: data }));
+            output => {
+                this.completeInput(input, output);
                 this.finishedInput(input);
             },
             error => {
                 if (error === SequenceExecutorError.SKIP) {
                     this.skipInput(input);
                 } else {
-                    this.observer.next(new ObservableData(LoadableEvent.ERROR, { input, error }));
+                    this.errorInput(input, error);
                     this.finishedInput(input);
                 }
             }
@@ -223,6 +242,7 @@ export abstract class SequenceExecutor<U, V> extends Loadable<LoadableEvent, Seq
         if (this.isDestroyed) {
             return;
         }
+
         this.stop();
         super.destroy();
 
