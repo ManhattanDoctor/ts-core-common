@@ -2,7 +2,7 @@ import { Exclude, Transform } from 'class-transformer';
 import * as _ from 'lodash';
 import { ObjectUtil, TransformUtil } from '../util';
 
-export class ExtendedError<T = any> extends Error implements Error {
+export class ExtendedError<U = any, V = number> extends Error implements Error {
     // --------------------------------------------------------------------------
     //
     //  Constants
@@ -46,7 +46,7 @@ export class ExtendedError<T = any> extends Error implements Error {
     //
     // --------------------------------------------------------------------------
 
-    public static create(item: Error | ExtendedError, code?: number): ExtendedError {
+    public static create(item: Error | ExtendedError, code?: any): ExtendedError {
         if (item instanceof ExtendedError) {
             return item;
         }
@@ -73,7 +73,7 @@ export class ExtendedError<T = any> extends Error implements Error {
     //
     // --------------------------------------------------------------------------
 
-    public code: number;
+    public code: V;
     public message: string;
     public isFatal: boolean;
 
@@ -82,7 +82,7 @@ export class ExtendedError<T = any> extends Error implements Error {
 
     @Transform(TransformUtil.toJSON, { toClassOnly: true })
     @Transform(TransformUtil.fromJSON, { toPlainOnly: true })
-    public details: T;
+    public details: U;
 
     // --------------------------------------------------------------------------
     //
@@ -90,17 +90,14 @@ export class ExtendedError<T = any> extends Error implements Error {
     //
     // --------------------------------------------------------------------------
 
-    constructor(message: string, code: number = null, details: T = null, isFatal: boolean = true) {
+    constructor(message: string, code: V = null, details: U = null, isFatal: boolean = true) {
         super(message);
-        if (!_.isNumber(code)) {
-            code = ExtendedError.DEFAULT_ERROR_CODE;
+        if (!_.isNil(code)) {
+            code = ExtendedError.DEFAULT_ERROR_CODE as any;
         }
 
         Object.defineProperty(this, 'stack', { enumerable: true, writable: true });
-        Object.defineProperty(this, 'message', {
-            enumerable: true,
-            writable: true
-        });
+        Object.defineProperty(this, 'message', { enumerable: true, writable: true });
 
         this.code = code;
         this.message = message;
@@ -120,10 +117,10 @@ export class ExtendedError<T = any> extends Error implements Error {
 
     public toString(): string {
         let value = this.message;
-        if (_.isNumber(this.code)) {
+        if (!_.isNil(this.code)) {
             value += ` (${this.code})`;
         }
-        if (this.details) {
+        if (!_.isEmpty(this.details)) {
             value += `\n${this.details}`;
         }
         return value;

@@ -33,14 +33,6 @@ export class TransportHttp extends Transport<ITransportHttpSettings> {
 
     // --------------------------------------------------------------------------
     //
-    //  Properties
-    //
-    // --------------------------------------------------------------------------
-
-    public settings: ITransportHttpSettings;
-
-    // --------------------------------------------------------------------------
-    //
     //  Constructor
     //
     // --------------------------------------------------------------------------
@@ -210,6 +202,25 @@ export class TransportHttp extends Transport<ITransportHttpSettings> {
         if (request.method.toLowerCase() === 'get') {
             request.params = request.data;
             delete request.data;
+        }
+    }
+
+    // --------------------------------------------------------------------------
+    //
+    //  Public Properties
+    //
+    // --------------------------------------------------------------------------
+
+    public get headers(): any {
+        return !_.isNil(this.settings) ? this.settings.headers : null;
+    }
+
+    public get url(): string {
+        return !_.isNil(this.settings) ? this.settings.baseURL : null;
+    }
+    public set url(value: string) {
+        if (!_.isNil(this.settings)) {
+            this.settings.baseURL = value;
         }
     }
 }
