@@ -92,14 +92,10 @@ export class ExtendedError<U = any, V = number> extends Error implements Error {
 
     constructor(message: string, code: V = null, details: U = null, isFatal: boolean = true) {
         super(message);
-        if (!_.isNil(code)) {
-            code = ExtendedError.DEFAULT_ERROR_CODE as any;
-        }
-
         Object.defineProperty(this, 'stack', { enumerable: true, writable: true });
         Object.defineProperty(this, 'message', { enumerable: true, writable: true });
 
-        this.code = code;
+        this.code = !_.isNil(code)? code : ExtendedError.DEFAULT_ERROR_CODE as any;
         this.message = message;
         this.details = details;
         this.isFatal = _.isBoolean(isFatal) ? isFatal : true;
