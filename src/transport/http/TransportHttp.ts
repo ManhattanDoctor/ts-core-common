@@ -13,7 +13,7 @@ import { ITransportHttpRequest } from './ITransportHttpRequest';
 import { ITransportHttpSettings } from './ITransportHttpSettings';
 import { TransportHttpCommandAsync } from './TransportHttpCommandAsync';
 
-export class TransportHttp extends Transport<ITransportHttpSettings> {
+export class TransportHttp<T extends ITransportHttpSettings = ITransportHttpSettings> extends Transport<T> {
     // --------------------------------------------------------------------------
     //
     // 	Static Methods
@@ -37,7 +37,7 @@ export class TransportHttp extends Transport<ITransportHttpSettings> {
     //
     // --------------------------------------------------------------------------
 
-    constructor(logger: ILogger, settings: ITransportHttpSettings, context?: string) {
+    constructor(logger: ILogger, settings: T, context?: string) {
         super(logger, settings, context);
     }
 
