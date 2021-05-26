@@ -48,7 +48,7 @@ export abstract class Transport<T extends ITransportSettings = any> extends Logg
     protected listeners: Map<string, Subject<any>>;
     protected dispatchers: Map<string, Subject<any>>;
 
-    protected settings: T;
+    protected _settings: T;
     protected observer: Subject<ObservableData<LoadableEvent, ITransportCommand<any>>>;
 
     // --------------------------------------------------------------------------
@@ -60,7 +60,7 @@ export abstract class Transport<T extends ITransportSettings = any> extends Logg
     constructor(logger: ILogger, settings?: T, context?: string) {
         super(logger, context);
 
-        this.settings = settings;
+        this._settings = settings;
         this.observer = new Subject();
 
         this.requests = new Map();
@@ -131,6 +131,8 @@ export abstract class Transport<T extends ITransportSettings = any> extends Logg
 
         this.promises.clear();
         this.promises = null;
+
+        this._settings = null;
     }
 
     // --------------------------------------------------------------------------
@@ -324,7 +326,7 @@ export abstract class Transport<T extends ITransportSettings = any> extends Logg
 
     // --------------------------------------------------------------------------
     //
-    //  Protected Propeties
+    //  Protected Properties
     //
     // --------------------------------------------------------------------------
 
@@ -338,10 +340,14 @@ export abstract class Transport<T extends ITransportSettings = any> extends Logg
 
     // --------------------------------------------------------------------------
     //
-    //  Public Propeties
+    //  Public Properties
     //
     // --------------------------------------------------------------------------
 
+    public get settings(): T {
+        return this._settings;
+    }
+    
     public get events(): Observable<ObservableData<LoadableEvent, ITransportCommand<any>>> {
         return this.observer.asObservable();
     }
