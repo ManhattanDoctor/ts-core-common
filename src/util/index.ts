@@ -7,3 +7,4 @@ export * from './RandomUtil';
 export * from './TransformUtil';
 export * from './UrlUtil';
 export * from './ValidateUtil';
+export * from './StringUtil';

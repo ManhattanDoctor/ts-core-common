@@ -192,7 +192,7 @@ export class TransportHttp<T extends ITransportHttpSettings = ITransportHttpSett
         if (_.isNil(request.method)) {
             request.method = this.settings.method;
         }
-        if (_.isNil(request.isHandleError && this.settings.isHandleError)) {
+        if (_.isNil(request.isHandleError) && this.settings.isHandleError) {
             request.isHandleError = this.settings.isHandleError;
         }
         if (_.isNil(request.isHandleLoading) && this.settings.isHandleLoading) {
