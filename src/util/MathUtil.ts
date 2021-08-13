@@ -4,7 +4,7 @@ import * as _ from 'lodash';
 export class MathUtil {
     // --------------------------------------------------------------------------
     //
-    // 	Private Static Mehods
+    // 	Private Static Methods
     //
     // --------------------------------------------------------------------------
 
@@ -15,6 +15,15 @@ export class MathUtil {
     // 	Static Properties
     //
     // --------------------------------------------------------------------------
+
+    public static create(): Decimal.Constructor {
+        return Decimal.set(MathUtil.config || { defaults: true });
+    }
+
+    public static new(value: Decimal.Value): Decimal {
+        let item = MathUtil.create();
+        return new item(value);
+    }
 
     public static get config(): MathUtilConfig {
         return MathUtil._config;
@@ -28,10 +37,6 @@ export class MathUtil {
         MathUtil._config = value;
     }
 
-    public static create(): Decimal.Constructor {
-        return Decimal.set(MathUtil.config || { defaults: true });
-    }
-
     // --------------------------------------------------------------------------
     //
     // 	Static Methods
@@ -42,48 +47,42 @@ export class MathUtil {
         if (MathUtil.isInvalid(first) || MathUtil.isInvalid(second)) {
             return null;
         }
-        let constructor = MathUtil.create();
-        return MathUtil.toString(new constructor(first).add(new constructor(second)));
+        return MathUtil.toString(MathUtil.new(first).add(MathUtil.new(second)));
     }
 
     public static subtract(first: string, second: string): string {
         if (MathUtil.isInvalid(first) || MathUtil.isInvalid(second)) {
             return null;
         }
-        let constructor = MathUtil.create();
-        return MathUtil.toString(new constructor(first).sub(new constructor(second)));
+        return MathUtil.toString(MathUtil.new(first).sub(MathUtil.new(second)));
     }
 
     public static multiply(first: string, second: string): string {
         if (MathUtil.isInvalid(first) || MathUtil.isInvalid(second)) {
             return null;
         }
-        let constructor = MathUtil.create();
-        return MathUtil.toString(new constructor(first).mul(new constructor(second)));
+        return MathUtil.toString(MathUtil.new(first).mul(MathUtil.new(second)));
     }
 
     public static divide(first: string, second: string): string {
         if (MathUtil.isInvalid(first) || MathUtil.isInvalid(second)) {
             return null;
         }
-        let constructor = MathUtil.create();
-        return MathUtil.toString(new constructor(first).dividedBy(new constructor(second)));
+        return MathUtil.toString(MathUtil.new(first).dividedBy(MathUtil.new(second)));
     }
 
     public static ceil(value: string): string {
         if (MathUtil.isInvalid(value)) {
             return null;
         }
-        let constructor = MathUtil.create();
-        return MathUtil.toString(new constructor(value).ceil());
+        return MathUtil.toString(MathUtil.new(value).ceil());
     }
 
     public static floor(value: string): string {
         if (MathUtil.isInvalid(value)) {
             return null;
         }
-        let constructor = MathUtil.create();
-        return MathUtil.toString(new constructor(value).floor());
+        return MathUtil.toString(MathUtil.new(value).floor());
     }
 
     public static toString(value: Decimal.Value): string {
@@ -97,16 +96,14 @@ export class MathUtil {
         if (MathUtil.isInvalid(value)) {
             return null;
         }
-        let constructor = MathUtil.create();
-        return new constructor(value).toNumber();
+        return MathUtil.new(value).toNumber();
     }
 
     public static toHex(value: Decimal.Value): string {
         if (MathUtil.isInvalid(value)) {
             return null;
         }
-        let constructor = MathUtil.create();
-        return new constructor(value).toHex();
+        return MathUtil.new(value).toHex();
     }
 
     public static isInvalid(value: Decimal.Value): boolean {
@@ -137,8 +134,7 @@ export class MathUtil {
         if (MathUtil.isInvalid(value)) {
             return null;
         }
-        let constructor = MathUtil.create();
-        return MathUtil.toString(new constructor(value).abs());
+        return MathUtil.toString(MathUtil.new(value).abs());
     }
 
     // --------------------------------------------------------------------------
@@ -151,40 +147,35 @@ export class MathUtil {
         if (MathUtil.isInvalid(first) || MathUtil.isInvalid(second)) {
             throw new Error(`Invalid arguments`);
         }
-        let constructor = MathUtil.create();
-        return new constructor(first).lessThan(new constructor(second));
+        return MathUtil.new(first).lessThan(MathUtil.new(second));
     }
 
     public static lessThanOrEqualTo(first: string, second: string): boolean {
         if (MathUtil.isInvalid(first) || MathUtil.isInvalid(second)) {
             throw new Error(`Invalid arguments`);
         }
-        let constructor = MathUtil.create();
-        return new constructor(first).lessThanOrEqualTo(new constructor(second));
+        return MathUtil.new(first).lessThanOrEqualTo(MathUtil.new(second));
     }
 
     public static greaterThan(first: string, second: string): boolean {
         if (MathUtil.isInvalid(first) || MathUtil.isInvalid(second)) {
             throw new Error(`Invalid arguments`);
         }
-        let constructor = MathUtil.create();
-        return new constructor(first).greaterThan(new constructor(second));
+        return MathUtil.new(first).greaterThan(MathUtil.new(second));
     }
 
     public static greaterThanOrEqualTo(first: string, second: string): boolean {
         if (MathUtil.isInvalid(first) || MathUtil.isInvalid(second)) {
             throw new Error(`Invalid arguments`);
         }
-        let constructor = MathUtil.create();
-        return new constructor(first).greaterThanOrEqualTo(new constructor(second));
+        return MathUtil.new(first).greaterThanOrEqualTo(MathUtil.new(second));
     }
 
     public static equals(first: string, second: string): boolean {
         if (MathUtil.isInvalid(first) || MathUtil.isInvalid(second)) {
             throw new Error(`Invalid arguments`);
         }
-        let constructor = MathUtil.create();
-        return new constructor(first).equals(new constructor(second));
+        return MathUtil.new(first).equals(MathUtil.new(second));
     }
 }
 
