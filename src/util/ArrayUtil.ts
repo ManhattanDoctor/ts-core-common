@@ -81,4 +81,55 @@ export class ArrayUtil {
         }
         return items;
     }
+
+    // --------------------------------------------------------------------------
+    //
+    //  Get Items
+    //
+    // --------------------------------------------------------------------------
+
+    public static nextItem<T>(item: T, items: Array<T>, isLoop: boolean): T {
+        let index = this.nextIndex(item, items, isLoop);
+        return !_.isNil(index) ? items[index] : null;
+    }
+
+    public static previousItem<T>(item: T, items: Array<T>, isLoop: boolean): T {
+        let index = this.previousIndex(item, items, isLoop);
+        return !_.isNil(index) ? items[index] : null;
+    }
+
+    public static nextIndex<T>(item: T, items: Array<T>, isLoop: boolean): number {
+        let index = ArrayUtil.getIndex(item, items);
+        if (_.isNil(index)) {
+            return null;
+        }
+        index++;
+        if (index > items.length - 1) {
+            index = isLoop ? 0 : null;
+        }
+        return index;
+    }
+
+    public static previousIndex<T>(item: T, items: Array<T>, isLoop: boolean): number {
+        let index = ArrayUtil.getIndex(item, items);
+        if (_.isNil(index)) {
+            return null;
+        }
+        index--;
+        if (index < 0) {
+            index = isLoop ? items.length - 1 : null;
+        }
+        return index;
+    }
+
+    public static getIndex<T>(item: T, items: Array<T>): number {
+        if (_.isNil(item) || !_.isArray(items) || items.length === 0) {
+            return null;
+        }
+        let index = items.indexOf(item);
+        if (index < 0) {
+            return null;
+        }
+        return index >= 0 ? index : null;
+    }
 }

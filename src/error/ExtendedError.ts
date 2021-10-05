@@ -95,7 +95,7 @@ export class ExtendedError<U = any, V = number> extends Error implements Error {
         Object.defineProperty(this, 'stack', { enumerable: true, writable: true });
         Object.defineProperty(this, 'message', { enumerable: true, writable: true });
 
-        this.code = !_.isNil(code)? code : ExtendedError.DEFAULT_ERROR_CODE as any;
+        this.code = !_.isNil(code) ? code : (ExtendedError.DEFAULT_ERROR_CODE as any);
         this.message = message;
         this.details = details;
         this.isFatal = _.isBoolean(isFatal) ? isFatal : true;
@@ -116,8 +116,14 @@ export class ExtendedError<U = any, V = number> extends Error implements Error {
         if (!_.isNil(this.code)) {
             value += ` (${this.code})`;
         }
-        if (!_.isEmpty(this.details)) {
-            value += `\n${this.details}`;
+        if (!_.isNil(this.details)) {
+            let details = this.details.toString();
+            if (_.isObjectLike(this.details)) {
+                details = JSON.stringify(this.details, null, 4);
+            } else if (_.isString(this.details) && ObjectUtil.isJSON(this.details)) {
+                details = JSON.stringify(JSON.parse(this.details), null, 4);
+            }
+            value += `\n${details}`;
         }
         return value;
     }

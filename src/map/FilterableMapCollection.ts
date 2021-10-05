@@ -9,7 +9,7 @@ export class FilterableMapCollection<U> extends DestroyableMapCollection<U> {
     //
     // --------------------------------------------------------------------------
 
-    protected _filters: Array<(U) => boolean>;
+    protected _filters: Array<FilterFunction>;
     protected _filtered: Array<U>;
 
     // --------------------------------------------------------------------------
@@ -98,7 +98,9 @@ export class FilterableMapCollection<U> extends DestroyableMapCollection<U> {
         return this._filtered;
     }
 
-    public get filters(): Array<(U) => boolean> {
+    public get filters(): Array<FilterFunction> {
         return this._filters;
     }
 }
+
+export type FilterFunction = <U>(item: U) => boolean;
