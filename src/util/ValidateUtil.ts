@@ -9,24 +9,29 @@ export class ValidateUtil {
     //
     // --------------------------------------------------------------------------
 
-    public static validate<T = any>(item: T, isNeedThrowError: boolean = true, options?: ValidatorOptions): Array<ValidationError> {
+    public static validate<T = any>(item: T, isNeedThrowError: boolean = true, options?: ValidatorOptions, code?: number): Array<ValidationError> {
         if (_.isNil(item) || !_.isObject(item)) {
             return [];
         }
         let errors = validateSync(item, options);
         if (isNeedThrowError && !_.isEmpty(errors)) {
-            throw new ExtendedError(`Validation failed`, null, errors);
+            throw new ExtendedError(ValidateUtil.toString(errors), !_.isNil(code) ? code : ExtendedError.HTTP_CODE_BAD_REQUEST, errors);
         }
         return errors;
     }
 
-    public static async validateAsync<T = any>(item: T, isNeedThrowError: boolean = true, options?: ValidatorOptions): Promise<Array<ValidationError>> {
+    public static async validateAsync<T = any>(
+        item: T,
+        isNeedThrowError: boolean = true,
+        options?: ValidatorOptions,
+        code?: number
+    ): Promise<Array<ValidationError>> {
         if (_.isNil(item) || !_.isObject(item)) {
             return [];
         }
         let errors = await validate(item, options);
         if (isNeedThrowError && !_.isEmpty(errors)) {
-            throw new ExtendedError(`Validation failed`, null, errors);
+            throw new ExtendedError(ValidateUtil.toString(errors), !_.isNil(code) ? code : ExtendedError.HTTP_CODE_BAD_REQUEST, errors);
         }
         return errors;
     }
