@@ -105,6 +105,15 @@ export class TransportLocal extends Transport<ITransportSettings> {
         return item;
     }
 
+    protected async dispatchCommand<U>(command: ITransportCommand<U>, options: ITransportCommandOptions, isNeedReply: boolean): Promise<void> {
+        let listener = this.listeners.get(command.name);
+        if (_.isNil(listener)) {
+            this.complete(command, new ExtendedError(`No listener for "${command.name}" command`));
+            return;
+        }
+        listener.next(command);
+    }
+
     // --------------------------------------------------------------------------
     //
     //  Private Methods
@@ -132,13 +141,7 @@ export class TransportLocal extends Transport<ITransportSettings> {
             this.requests.delete(command.id);
             return;
         }
-
-        let listener = this.listeners.get(command.name);
-        if (_.isNil(listener)) {
-            this.complete(command, new ExtendedError(`No listener for "${command.name}" command`));
-            return;
-        }
-        listener.next(command);
+        this.dispatchCommand(command, options, isNeedReply);
     }
 
     protected responseSend<U, V>(command: ITransportCommandAsync<U, V>): void {
