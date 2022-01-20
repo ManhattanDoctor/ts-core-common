@@ -2,7 +2,7 @@ import { ILogger } from '../logger';
 import { AbstractTransportCommandHandler } from './AbstractTransportCommandHandler';
 import { ITransport, ITransportCommand } from './ITransport';
 
-export abstract class TransportCommandHandler<U, T extends ITransportCommand<U>> extends AbstractTransportCommandHandler<U, T> {
+export abstract class TransportCommandHandler<U, T extends ITransportCommand<U>, V = void> extends AbstractTransportCommandHandler<U, T> {
     // --------------------------------------------------------------------------
     //
     //  Constructor
@@ -29,7 +29,7 @@ export abstract class TransportCommandHandler<U, T extends ITransportCommand<U>>
     //
     // --------------------------------------------------------------------------
 
-    protected checkResponse(params: any): any {
+    protected checkResponse(params: V): V {
         return params;
     }
 
@@ -39,5 +39,5 @@ export abstract class TransportCommandHandler<U, T extends ITransportCommand<U>>
     //
     // --------------------------------------------------------------------------
 
-    protected abstract execute(params: U): Promise<any>;
+    protected abstract execute(params: U): Promise<V>;
 }

@@ -1,5 +1,5 @@
 import * as _ from 'lodash';
-import * as uuid from 'uuid';
+import { v4 as uuid } from 'uuid';
 import { ITraceable } from './ITraceable';
 
 export class TraceUtil {

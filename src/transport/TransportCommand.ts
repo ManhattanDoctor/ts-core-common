@@ -1,4 +1,4 @@
-import * as uuid from 'uuid';
+import { v4 as uuid } from 'uuid';
 import { ITransportCommand } from './ITransport';
 import { IsString, IsDefined } from 'class-validator';
 import * as _ from 'lodash';

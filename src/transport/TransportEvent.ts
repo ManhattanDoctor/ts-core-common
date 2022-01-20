@@ -2,7 +2,7 @@ import * as _ from 'lodash';
 import { ITransportEvent } from './ITransport';
 import { IsString, IsOptional } from 'class-validator';
 import { ValidateUtil } from '../util';
-import * as uuid from 'uuid';
+import { v4 as uuid } from 'uuid';
 
 export class TransportEvent<T> implements ITransportEvent<T> {
     // --------------------------------------------------------------------------
