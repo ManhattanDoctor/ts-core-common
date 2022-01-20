@@ -1,7 +1,6 @@
-import { ClassType } from 'class-transformer/ClassTransformer';
 import * as _ from 'lodash';
 import { ValidatorOptions } from 'class-validator';
-import { ValidateUtil, TransformUtil } from '../util';
+import { ValidateUtil, TransformUtil, ClassType } from '../util';
 
 export const ValidateResult = <U>(classType?: ClassType<U>, options?: ValidatorOptions): Function => {
     return function(target: any, propertyKey: string, descriptor: PropertyDescriptor) {

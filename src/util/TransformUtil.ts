@@ -1,5 +1,4 @@
 import { classToPlain, ClassTransformOptions, plainToClass } from 'class-transformer';
-import { ClassType } from 'class-transformer/ClassTransformer';
 import * as _ from 'lodash';
 import { DateUtil } from './DateUtil';
 import { ObjectUtil } from './ObjectUtil';
@@ -92,3 +91,7 @@ export class TransformUtil {
         return items.map(item => TransformUtil.toClassBuffer(type, item, options));
     }
 }
+
+export declare type ClassType<T> = {
+    new (...args: any[]): T;
+};
