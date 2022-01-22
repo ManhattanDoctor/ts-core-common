@@ -7,13 +7,43 @@ export class DateUtil {
     //
     // --------------------------------------------------------------------------
 
-    public static MILISECONDS_YEAR = 12 * 30 * 24 * 60 * 60 * 1000;
-    public static MILISECONDS_MONTH = 30 * 24 * 60 * 60 * 1000;
-    public static MILISECONDS_DAY = 24 * 60 * 60 * 1000;
-    public static MILISECONDS_HOUR = 60 * 60 * 1000;
-    public static MILISECONDS_MINUTE = 60 * 1000;
-    public static MILISECONDS_SECOND = 1000;
-    public static MILISECONDS_NANOSECOND = 1 / 1000000;
+    public static MILLISECONDS_YEAR = 12 * 30 * 24 * 60 * 60 * 1000;
+    public static MILLISECONDS_MONTH = 30 * 24 * 60 * 60 * 1000;
+    public static MILLISECONDS_DAY = 24 * 60 * 60 * 1000;
+    public static MILLISECONDS_HOUR = 60 * 60 * 1000;
+    public static MILLISECONDS_MINUTE = 60 * 1000;
+    public static MILLISECONDS_SECOND = 1000;
+    public static MILLISECONDS_NANOSECOND = 1 / 1000000;
+
+    /**
+     * @deprecated Use MILLISECONDS_YEAR instead
+     */
+    public static MILISECONDS_YEAR = DateUtil.MILLISECONDS_YEAR;
+    /**
+     * @deprecated Use MILLISECONDS_MONTH instead
+     */
+    public static MILISECONDS_MONTH = DateUtil.MILLISECONDS_MONTH;
+    /**
+     * @deprecated Use MILLISECONDS_DAY instead
+     */
+    public static MILISECONDS_DAY = DateUtil.MILLISECONDS_DAY;
+    /**
+     * @deprecated Use MILLISECONDS_HOUR instead
+     */
+    public static MILISECONDS_HOUR = DateUtil.MILLISECONDS_HOUR;
+    /**
+     * @deprecated Use MILLISECONDS_MINUTE instead
+     */
+    public static MILISECONDS_MINUTE = DateUtil.MILLISECONDS_MINUTE;
+    /**
+     * @deprecated Use MILLISECONDS_SECOND instead
+     */
+    public static MILISECONDS_SECOND = DateUtil.MILLISECONDS_SECOND;
+    /**
+     * @deprecated Use MILISECONDS_NANOSECOND instead
+     */
+    public static MILISECONDS_NANOSECOND = DateUtil.MILLISECONDS_NANOSECOND;
+
 
     // --------------------------------------------------------------------------
     //

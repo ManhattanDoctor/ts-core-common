@@ -177,7 +177,7 @@ export class LoggerWrapper extends Destroyable implements ILogger {
             return;
         }
         this._logger = value;
-        if (value) {
+        if (!_.isNil(value)) {
             this.commitLoggerProperties();
         }
     }
