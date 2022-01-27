@@ -178,7 +178,7 @@ export class MapCollection<U> extends Destroyable {
 
         for (let i = 0; i < delta; i++) {
             let item = this.getExcessItem();
-            if (_.isNil(item)) {
+            if (!_.isNil(item)) {
                 this.remove(this.getUidValue(item));
             }
         }
