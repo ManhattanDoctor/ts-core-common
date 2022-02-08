@@ -85,12 +85,20 @@ export class MapCollection<U> extends Destroyable {
         return !_.isNil(uid) ? this.map.get(uid) : null;
     }
 
+    public getByIndex(index: number): U {
+        return !_.isEmpty(this._collection) ? this._collection[index] : null;
+    }
+
     public getFirst(): U {
         return !_.isEmpty(this._collection) ? this._collection[0] : null;
     }
 
     public getLast(): U {
         return !_.isEmpty(this._collection) ? this._collection[this._collection.length - 1] : null;
+    }
+
+    public getIndex(item: U): number {
+        return !_.isEmpty(this._collection) ? this._collection.indexOf(item) : null;
     }
 
     public has(uid: string): boolean {
@@ -147,7 +155,7 @@ export class MapCollection<U> extends Destroyable {
         let uid = null;
         try {
             uid = this.getUidValue(item);
-        } catch (error) {}
+        } catch (error) { }
 
         return !_.isNil(uid) ? uid : index;
     };

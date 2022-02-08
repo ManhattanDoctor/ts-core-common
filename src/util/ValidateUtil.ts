@@ -44,14 +44,14 @@ export class ValidateUtil {
         return _.isEmpty(await this.validateAsync(item, isNeedThrowError, options));
     }
 
-    public static toString(items: Array<ValidationError>): string {
+    public static toString(items: Array<ValidationError | string>): string {
         if (!_.isArray(items) || _.isEmpty(items)) {
             return `Validation failed`;
         }
 
         let value = ``;
         for (let item of items) {
-            if (item instanceof ValidationError) {
+            if (!_.isNil(item)) {
                 value += `${item.toString()}\n`;
             }
         }
