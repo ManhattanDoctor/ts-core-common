@@ -21,7 +21,6 @@ export class UrlUtil {
         if (_.isNil(value)) {
             return null;
         }
-
         value = value.toString();
         if (value.substr(-1) != '/') {
             value += '/';

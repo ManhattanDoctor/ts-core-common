@@ -10,6 +10,7 @@ export class ExtendedError<U = any, V = number> extends Error implements Error {
     // --------------------------------------------------------------------------
 
     public static DEFAULT_ERROR_CODE = -1000;
+    public static DEFAULT_ERROR_MESSAGE = 'Default extended error';
 
     public static HTTP_CODE_BAD_REQUEST = 400;
     public static HTTP_CODE_UNAUTHORIZED = 401;
@@ -46,21 +47,36 @@ export class ExtendedError<U = any, V = number> extends Error implements Error {
     //
     // --------------------------------------------------------------------------
 
-    public static create(item: Error | ExtendedError, code?: any): ExtendedError {
+    public static create(item: Error | ExtendedError | any, code?: any): ExtendedError {
         if (item instanceof ExtendedError) {
             return item;
         }
 
-        if (_.isNil(code) && ObjectUtil.hasOwnProperty(item, 'code')) {
-            code = item['code'];
+        if (_.isNil(code)) {
+            code = ExtendedError.DEFAULT_ERROR_CODE;
+        }
+        let details = null;
+        let message = null;
+        if (item instanceof Error) {
+            details = item.stack;
+            message = item.message;
+            if (!_.isEmpty(item.name)) {
+                message = `[${item.name}] ${message}`;
+            }
+            return new ExtendedError(message, code, details);
         }
 
-        let message = item.message;
-        if (!_.isEmpty(item.name)) {
-            message = `[${item.name}] ${message}`;
+        message = ExtendedError.DEFAULT_ERROR_MESSAGE;
+        if (!_.isNil(item.code)) {
+            code = item.code;
         }
-
-        return new ExtendedError(message, !_.isNil(code) ? code : ExtendedError.DEFAULT_ERROR_CODE, item.stack);
+        if (!_.isNil(item.message)) {
+            message = item.message;
+        }
+        if (!_.isNil(item.details)) {
+            details = item.details;
+        }
+        return new ExtendedError(message, code, details);
     }
 
     public static instanceOf(data: any): data is ExtendedError {
@@ -80,8 +96,8 @@ export class ExtendedError<U = any, V = number> extends Error implements Error {
     @Exclude({ toPlainOnly: true })
     public stack: string;
 
-    @Transform(TransformUtil.toJSON, { toClassOnly: true })
-    @Transform(TransformUtil.fromJSON, { toPlainOnly: true })
+    @Transform(params => (!_.isNil(params.value) ? TransformUtil.toJSON(params.value) : null), { toClassOnly: true })
+    @Transform(params => (!_.isNil(params.value) ? TransformUtil.fromJSON(params.value) : null), { toPlainOnly: true })
     public details: U;
 
     // --------------------------------------------------------------------------
