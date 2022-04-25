@@ -93,7 +93,8 @@ export abstract class FilterableDataSourceMapCollection<U, V = any> extends Data
     }
 
     public async reload(): Promise<void> {
-        this.setLength(0);
+        // this.setLength(0);
+        this.clear();
         return super.reload();
     }
 

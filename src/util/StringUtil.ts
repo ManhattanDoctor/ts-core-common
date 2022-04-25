@@ -7,6 +7,15 @@ export class StringUtil {
     //
     // --------------------------------------------------------------------------
 
+    public static removeHTMLTags(item: string): string {
+        if (_.isEmpty(item)) {
+            return item;
+        }
+        item = item.replace(/<br\s*[\/]?>/g, '\n');
+        item = item.replace(/<[^>]*>/g, '');
+        return item;
+    }
+
     public static toHexColor(item: string, isNeedPrefix: boolean = true): string {
         if (_.isEmpty(item)) {
             return isNeedPrefix ? '#000000' : '000000';

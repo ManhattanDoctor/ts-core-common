@@ -97,8 +97,12 @@ export class MapCollection<U> extends Destroyable {
         return !_.isEmpty(this._collection) ? this._collection[this._collection.length - 1] : null;
     }
 
-    public getIndex(item: U): number {
-        return !_.isEmpty(this._collection) ? this._collection.indexOf(item) : null;
+    public getIndex(item: U, fromIndex?: number): number {
+        if (_.isEmpty(this._collection)) {
+            return null;
+        }
+        let index = this._collection.indexOf(item, fromIndex);
+        return index !== -1 ? index : null;
     }
 
     public has(uid: string): boolean {
