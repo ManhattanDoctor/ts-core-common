@@ -1,9 +1,7 @@
 import * as _ from 'lodash';
-import { filter } from 'rxjs';
 import { Filterable } from '../../dto/Filterable';
 import { FilterableConditions, FilterableSort, IFilterable, IsFilterableCondition } from '../../dto/IFilterable';
 import { ExtendedError } from '../../error';
-import { LoadableEvent } from '../../Loadable';
 import { ObjectUtil } from '../../util';
 import { DataSourceMapCollection } from './DataSourceMapCollection';
 
@@ -79,6 +77,7 @@ export abstract class FilterableDataSourceMapCollection<U, V = any> extends Data
         super.parseError(error);
         this.clear();
     }
+
 
     // --------------------------------------------------------------------------
     //
