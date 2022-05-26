@@ -1,6 +1,9 @@
 import * as _ from 'lodash';
+import { filter } from 'rxjs';
 import { Filterable } from '../../dto/Filterable';
 import { FilterableConditions, FilterableSort, IFilterable, IsFilterableCondition } from '../../dto/IFilterable';
+import { ExtendedError } from '../../error';
+import { LoadableEvent } from '../../Loadable';
 import { ObjectUtil } from '../../util';
 import { DataSourceMapCollection } from './DataSourceMapCollection';
 
@@ -72,6 +75,11 @@ export abstract class FilterableDataSourceMapCollection<U, V = any> extends Data
         return this.createConditionsForRequest(conditions);
     }
 
+    protected parseError(error: ExtendedError): void {
+        super.parseError(error);
+        this.clear();
+    }
+
     // --------------------------------------------------------------------------
     //
     // 	Public Methods
@@ -92,11 +100,13 @@ export abstract class FilterableDataSourceMapCollection<U, V = any> extends Data
         }
     }
 
+    /*
     public async reload(): Promise<void> {
         // this.setLength(0);
-        this.clear();
+        // this.clear();
         return super.reload();
     }
+    */
 
     public destroy(): void {
         if (this.isDestroyed) {
