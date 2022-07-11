@@ -171,7 +171,8 @@ export class MapCollection<U> extends Destroyable {
     // --------------------------------------------------------------------------
 
     protected getUidValue(item: U): string {
-        return item[this.uidPropertyName as any];
+        let value = item[this.uidPropertyName];
+        return !_.isNil(value) ? value.toString() : null;
     }
 
     protected setLength(value: number): void {

@@ -19,7 +19,7 @@ export abstract class Transport<T extends ITransportSettings = any> extends Logg
     //
     // --------------------------------------------------------------------------
 
-    public static DEFAULT_TIMEOUT = 30 * DateUtil.MILISECONDS_SECOND;
+    public static DEFAULT_TIMEOUT = 30 * DateUtil.MILLISECONDS_SECOND;
     public static DEFAULT_WAIT_DELAY = TransportCommandWaitDelay.NORMAL;
     public static DEFAULT_WAIT_MAX_COUNT = 3;
 

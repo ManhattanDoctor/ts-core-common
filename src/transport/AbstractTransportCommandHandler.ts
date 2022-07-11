@@ -33,6 +33,9 @@ export abstract class AbstractTransportCommandHandler<U, T extends ITransportCom
         if (_.isNil(error)) {
             error = new ExtendedError(`Undefined error`);
         }
+        else if (_.isString(error)) {
+            error = new ExtendedError(error);
+        }
         this.transport.complete(command, error);
         this.error(error, ExtendedError.instanceOf(error) && !error.isFatal ? '' : error.stack);
     }
