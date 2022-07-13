@@ -1,8 +1,16 @@
 {
     "name": "@ts-core/common",
-    "version": "2.0.10",
+    "version": "3.0.0",
     "description": "Common classes and utils",
-    "main": "index.js",
+    "main": "./cjs/public-api.js",
+    "module": "./esm/public-api.js",
+    "type": "module",
+    "exports": {
+        ".": {
+            "import": "./esm/public-api.js",
+            "require": "./cjs/public-api.cjs"
+        }
+    },
     "scripts": {},
     "author": {
         "name": "Renat Gubaev",

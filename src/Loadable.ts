@@ -132,8 +132,6 @@ export abstract class Loadable<U = any, V = any> extends DestroyableContainer {
     }
 }
 
-export interface ILoadable {}
-
 export interface ILoadableStatusChangeData {
     oldStatus: LoadableStatus;
     newStatus: LoadableStatus;
