@@ -2,7 +2,7 @@ import * as _ from 'lodash';
 import { IPageBookmark, IPaginationBookmark, IPaginableBookmark } from '../../dto';
 import { FilterableDataSourceMapCollection } from './FilterableDataSourceMapCollection';
 
-export abstract class PaginableBookmarkDataSourceMapCollection<U, V> extends FilterableDataSourceMapCollection<U, IPaginationBookmark<V>>
+export abstract class PaginableBookmarkDataSourceMapCollection<U, V, T = any> extends FilterableDataSourceMapCollection<U, IPaginationBookmark<V>, T>
     implements IPageBookmark {
     // --------------------------------------------------------------------------
     //
@@ -43,8 +43,8 @@ export abstract class PaginableBookmarkDataSourceMapCollection<U, V> extends Fil
     //
     // --------------------------------------------------------------------------
 
-    protected createRequestData(): IPaginableBookmark<U> {
-        let params: IPaginableBookmark<U> = super.createRequestData() as any;
+    protected createRequestData(): IPaginableBookmark<U, T> {
+        let params: IPaginableBookmark<U, T> = super.createRequestData() as any;
         params.pageBookmark = this.pageBookmark;
         params.pageSize = this.pageSize;
         return params;
@@ -64,11 +64,11 @@ export abstract class PaginableBookmarkDataSourceMapCollection<U, V> extends Fil
         this._isAllLoaded = this.isAllLoaded || this.pageSize > items.length;
     }
 
-    protected commitDetailsProperties(): void {}
+    protected commitDetailsProperties(): void { }
 
-    protected commitPageSizeProperties(): void {}
+    protected commitPageSizeProperties(): void { }
 
-    protected commitPageBookmarkProperties(): void {}
+    protected commitPageBookmarkProperties(): void { }
 
     // --------------------------------------------------------------------------
     //

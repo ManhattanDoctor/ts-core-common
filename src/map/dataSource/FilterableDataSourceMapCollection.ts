@@ -5,7 +5,7 @@ import { ExtendedError } from '../../error';
 import { ObjectUtil } from '../../util';
 import { DataSourceMapCollection } from './DataSourceMapCollection';
 
-export abstract class FilterableDataSourceMapCollection<U, V = any> extends DataSourceMapCollection<U, V> {
+export abstract class FilterableDataSourceMapCollection<U, V = any, T = any> extends DataSourceMapCollection<U, V> {
     // --------------------------------------------------------------------------
     //
     //  Properties
@@ -13,8 +13,10 @@ export abstract class FilterableDataSourceMapCollection<U, V = any> extends Data
     // --------------------------------------------------------------------------
 
     protected _sort: FilterableSort<U> = {};
+    protected _sortExtras: FilterableSort<T> = {};
+
     protected _conditions: FilterableConditions<U> = {};
-    protected _conditionsExtras: any = {};
+    protected _conditionsExtras: FilterableConditions<T> = {};
 
     // --------------------------------------------------------------------------
     //
@@ -22,13 +24,17 @@ export abstract class FilterableDataSourceMapCollection<U, V = any> extends Data
     //
     // --------------------------------------------------------------------------
 
-    protected createRequestData(): IFilterable<U> {
-        let data: IFilterable<U> = {};
+    protected createRequestData(): IFilterable<U, T> {
+        let data: IFilterable<U, T> = {};
         let sort = this.createSortForRequest(this.sort);
+        let sortExtras = this.createSortExtrasForRequest(this.sortExtras);
         let conditions = this.createConditionsForRequest(this.conditions);
         let conditionsExtras = this.createConditionsExtrasForRequest(this.conditionsExtras);
         if (!_.isEmpty(sort)) {
             data.sort = sort;
+        }
+        if (!_.isEmpty(sortExtras)) {
+            data.sortExtras = sortExtras;
         }
         if (!_.isEmpty(conditions)) {
             data.conditions = conditions;
@@ -39,7 +45,7 @@ export abstract class FilterableDataSourceMapCollection<U, V = any> extends Data
         return data;
     }
 
-    protected createSortForRequest(sort: FilterableSort<U>): FilterableSort<U> {
+    protected createSortForRequest<U>(sort: FilterableSort<U>): FilterableSort<U> {
         if (_.isEmpty(sort)) {
             return null;
         }
@@ -52,7 +58,7 @@ export abstract class FilterableDataSourceMapCollection<U, V = any> extends Data
         return item;
     }
 
-    protected createConditionsForRequest(conditions: FilterableConditions<U>): FilterableConditions<U> {
+    protected createConditionsForRequest<U>(conditions: FilterableConditions<U>): FilterableConditions<U> {
         if (_.isEmpty(conditions)) {
             return null;
         }
@@ -69,7 +75,11 @@ export abstract class FilterableDataSourceMapCollection<U, V = any> extends Data
         return item;
     }
 
-    protected createConditionsExtrasForRequest(conditions: any): any {
+    protected createSortExtrasForRequest(sort: FilterableSort<T>): FilterableSort<T> {
+        return this.createSortForRequest(sort);
+    }
+    
+    protected createConditionsExtrasForRequest(conditions: FilterableConditions<T>): FilterableConditions<T> {
         return this.createConditionsForRequest(conditions);
     }
 
@@ -127,11 +137,15 @@ export abstract class FilterableDataSourceMapCollection<U, V = any> extends Data
         return this._sort;
     }
 
+    public get sortExtras(): FilterableSort<T> {
+        return this._sortExtras;
+    }
+
     public get conditions(): FilterableConditions<U> {
         return this._conditions;
     }
 
-    public get conditionsExtras(): any {
+    public get conditionsExtras(): FilterableConditions<T> {
         return this._conditionsExtras;
     }
 }

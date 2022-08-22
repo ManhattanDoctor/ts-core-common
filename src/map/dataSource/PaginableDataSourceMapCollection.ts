@@ -4,7 +4,7 @@ import { IPaginable } from '../../dto/IPaginable';
 import { IPagination } from '../../dto/IPagination';
 import { FilterableDataSourceMapCollection } from './FilterableDataSourceMapCollection';
 
-export abstract class PaginableDataSourceMapCollection<U, V = any> extends FilterableDataSourceMapCollection<U, IPagination<V>> implements IPage {
+export abstract class PaginableDataSourceMapCollection<U, V = any, T = any> extends FilterableDataSourceMapCollection<U, IPagination<V>, T> implements IPage {
     // --------------------------------------------------------------------------
     //
     //  Properties
@@ -44,8 +44,8 @@ export abstract class PaginableDataSourceMapCollection<U, V = any> extends Filte
     //
     // --------------------------------------------------------------------------
 
-    protected createRequestData(): IPaginable<U> {
-        let params: IPaginable<U> = super.createRequestData() as any;
+    protected createRequestData(): IPaginable<U, T> {
+        let params: IPaginable<U, T> = super.createRequestData() as any;
         params.pageIndex = this.pageIndex;
         params.pageSize = this.pageSize;
         return params;
@@ -80,9 +80,9 @@ export abstract class PaginableDataSourceMapCollection<U, V = any> extends Filte
     //
     // --------------------------------------------------------------------------
 
-    protected commitPageSizeProperties(): void {}
+    protected commitPageSizeProperties(): void { }
 
-    protected commitPageIndexProperties(): void {}
+    protected commitPageIndexProperties(): void { }
 
     // --------------------------------------------------------------------------
     //
