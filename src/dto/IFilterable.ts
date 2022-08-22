@@ -18,14 +18,17 @@ export enum FilterableConditionType {
     LESS = 'LESS',
     LESS_OR_EQUAL = 'LESS_OR_EQUAL',
     CONTAINS = 'CONTAINS',
-    CONTAINS_SENSITIVE = 'CONTAINS_SENSITIVE'
+    CONTAINS_SENSITIVE = 'CONTAINS_SENSITIVE',
+    INCLUDES_ALL = 'INCLUDES_ALL',
+    INCLUDES_ONE_OF = 'INCLUDES_ONE_OF',
 }
 
 export enum FilterableDataType {
     DATE = 'DATE',
+    ARRAY = 'ARRAY',
     STRING = 'STRING',
     NUMBER = 'NUMBER',
-    BOOLEAN = 'BOOLEAN'
+    BOOLEAN = 'BOOLEAN',
 }
 
 // --------------------------------------------------------------------------
@@ -120,8 +123,8 @@ export const ToFilterableCondition = <T>(value: string, type: FilterableDataType
     }
 
     return {
-        value: item,
         type,
+        value: item,
         condition: GetFilterableConditionType(value, defaultCondition)
     };
 };

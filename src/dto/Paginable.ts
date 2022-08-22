@@ -18,7 +18,7 @@ export class Paginable<U, V = any> extends Filterable<U> implements IPaginable<U
     //
     // --------------------------------------------------------------------------
 
-    public static transform<U, V>(item: IPaginable<U, V>): Paginable<U, V> {
+    public static transform<U, V,>(item: IPaginable<U, V>): Paginable<U, V> {
         if (_.isNil(item)) {
             return item;
         }
