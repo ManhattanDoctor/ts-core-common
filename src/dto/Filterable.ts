@@ -4,20 +4,23 @@ import { TraceUtil } from '../trace';
 import { DateUtil } from '../util';
 import { FilterableConditions, FilterableDataType, FilterableSort, IFilterable, IFilterableCondition, IsFilterableCondition } from './IFilterable';
 
-export class Filterable<U> implements IFilterable<U> {
+export class Filterable<U, V = any> implements IFilterable<U, V> {
     // --------------------------------------------------------------------------
     //
     //  Public Static Methods
     //
     // --------------------------------------------------------------------------
 
-    public static transform<U>(item: IFilterable<U>): Filterable<U> {
+    public static transform<U, V>(item: IFilterable<U, V>): Filterable<U, V> {
         if (_.isNil(item)) {
             return item;
         }
         TraceUtil.addIfNeed(item);
         if (!_.isNil(item.sort)) {
             item.sort = Filterable.parse(item.sort, Filterable.transformSort);
+        }
+        if (!_.isNil(item.sortExtras)) {
+            item.sortExtras = Filterable.parse(item.sortExtras, Filterable.transformSort);
         }
         if (!_.isNil(item.conditions)) {
             item.conditions = Filterable.parse(item.conditions, Filterable.transformCondition);
@@ -106,8 +109,11 @@ export class Filterable<U> implements IFilterable<U> {
     sort?: FilterableSort<U>;
 
     @IsOptional()
+    sortExtras?: FilterableSort<V>;
+
+    @IsOptional()
     conditions?: FilterableConditions<U>;
 
     @IsOptional()
-    conditionsExtras?: FilterableConditions<any>;
+    conditionsExtras?: FilterableConditions<V>;
 }

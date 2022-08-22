@@ -34,10 +34,12 @@ export enum FilterableDataType {
 //
 // --------------------------------------------------------------------------
 
-export interface IFilterable<U> extends ITraceable {
+export interface IFilterable<U, V = any> extends ITraceable {
     sort?: FilterableSort<U>;
     conditions?: FilterableConditions<U>;
-    conditionsExtras?: FilterableConditions<any>;
+
+    sortExtras?: FilterableSort<V>;
+    conditionsExtras?: FilterableConditions<V>;
 }
 
 export interface IFilterableCondition<T = any> {

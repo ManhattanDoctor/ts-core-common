@@ -2,7 +2,7 @@ import * as _ from 'lodash';
 import { Filterable } from './Filterable';
 import { IPaginable } from './IPaginable';
 
-export class Paginable<U> extends Filterable<U> implements IPaginable<U> {
+export class Paginable<U, V = any> extends Filterable<U> implements IPaginable<U, V> {
     // --------------------------------------------------------------------------
     //
     //  Constants
@@ -18,11 +18,11 @@ export class Paginable<U> extends Filterable<U> implements IPaginable<U> {
     //
     // --------------------------------------------------------------------------
 
-    public static transform<U>(item: IPaginable<U>): Paginable<U> {
+    public static transform<U, V>(item: IPaginable<U, V>): Paginable<U, V> {
         if (_.isNil(item)) {
             return item;
         }
-        item = Filterable.transform(item) as IPaginable<U>;
+        item = Filterable.transform(item) as IPaginable<U, V>;
         item.pageSize = !_.isNil(item.pageSize) ? parseInt(item.pageSize.toString(), 10) : Paginable.DEFAULT_PAGE_SIZE;
         item.pageIndex = !_.isNil(item.pageIndex) ? parseInt(item.pageIndex.toString(), 10) : Paginable.DEFAULT_PAGE_INDEX;
         return item;
