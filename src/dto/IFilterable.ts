@@ -13,12 +13,19 @@ export let FilterableConditionRegExp = /[<=>]/g;
 
 export enum FilterableConditionType {
     EQUAL = 'EQUAL',
+    
     MORE = 'MORE',
     MORE_OR_EQUAL = 'MORE_OR_EQUAL',
+
     LESS = 'LESS',
     LESS_OR_EQUAL = 'LESS_OR_EQUAL',
+
     CONTAINS = 'CONTAINS',
     CONTAINS_SENSITIVE = 'CONTAINS_SENSITIVE',
+
+    NULL = 'NULL',
+    NOT_NULL = 'NOT_NULL',
+
     INCLUDES_ALL = 'INCLUDES_ALL',
     INCLUDES_ONE_OF = 'INCLUDES_ONE_OF',
 }

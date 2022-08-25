@@ -95,15 +95,17 @@ export abstract class FilterableDataSourceMapCollection<U, V = any, T = any> ext
     //
     // --------------------------------------------------------------------------
 
-    public conditionsSort(isLoadAfter: boolean = true): void {
+    public conditionsSortClear(isReloadAfter: boolean = true): void {
         ObjectUtil.clear(this.sort);
-        if (isLoadAfter) {
-            this.load();
+        ObjectUtil.clear(this.sortExtras);
+        if (isReloadAfter) {
+            this.reload();
         }
     }
 
     public conditionsClear(isReloadAfter: boolean = true): void {
         ObjectUtil.clear(this.conditions);
+        ObjectUtil.clear(this.conditionsExtras);
         if (isReloadAfter) {
             this.reload();
         }
