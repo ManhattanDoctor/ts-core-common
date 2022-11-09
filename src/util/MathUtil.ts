@@ -78,6 +78,13 @@ export class MathUtil {
         return MathUtil.toString(MathUtil.new(value).ceil());
     }
 
+    public static pow(value: string, n: string): string {
+        if (MathUtil.isInvalid(value) || MathUtil.isInvalid(n)) {
+            return null;
+        }
+        return MathUtil.toString(MathUtil.new(value).pow(MathUtil.new(n)));
+    }
+
     public static floor(value: string): string {
         if (MathUtil.isInvalid(value)) {
             return null;

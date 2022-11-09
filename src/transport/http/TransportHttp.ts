@@ -123,18 +123,20 @@ export class TransportHttp<T extends ITransportHttpSettings = ITransportHttpSett
             return new TransportTimeoutError(command);
         }
 
-        if (_.isNil(data.response)) {
+        let response = data.response;
+        if (_.isNil(response)) {
             return new ExtendedError(`Unknown axios error`, ExtendedError.DEFAULT_ERROR_CODE, data);
         }
 
-        let response = data.response;
-        if (ExtendedError.instanceOf(response.data)) {
-            return ExtendedError.create(response.data);
+        if (ExtendedError.instanceOf(response)) {
+            return ExtendedError.create(response);
         }
 
         message = response.statusText;
-        if (_.isEmpty(message) && !_.isNil(response.data) && !_.isNil(response.data.error)) {
-            message = response.data.error;
+        
+        let error = _.get(response, 'data.error');
+        if (_.isEmpty(message) && !_.isEmpty(error)) {
+            message = error;
         }
         return new ExtendedError(message, response.status, response.data);
     }
@@ -225,5 +227,5 @@ export class TransportHttp<T extends ITransportHttpSettings = ITransportHttpSett
     }
 }
 
-export interface ITransportHttpCommand<T> extends ITransportCommand<ITransportHttpRequest<T>> {}
-export interface ITransportHttpCommandAsync<U, V> extends ITransportCommandAsync<ITransportHttpRequest<U>, V> {}
+export interface ITransportHttpCommand<T> extends ITransportCommand<ITransportHttpRequest<T>> { }
+export interface ITransportHttpCommandAsync<U, V> extends ITransportCommandAsync<ITransportHttpRequest<U>, V> { }
