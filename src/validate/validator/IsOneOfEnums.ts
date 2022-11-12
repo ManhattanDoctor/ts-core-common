@@ -1,8 +1,8 @@
 import { registerDecorator, ValidationOptions, ValidationArguments } from 'class-validator';
 import * as _ from 'lodash';
 
-export function IsOneOfEnums(items: Array<any>, options?: ValidationOptions): Function {
-    items = _.compact(items);
+export function IsOneOfEnums(entities: Array<any>, options?: ValidationOptions): Function {
+    entities = _.compact(entities);
     return (object: any, propertyName: string): void => {
         registerDecorator({
             name: 'IsOneOfEnums',
@@ -11,9 +11,13 @@ export function IsOneOfEnums(items: Array<any>, options?: ValidationOptions): Fu
             constraints: [propertyName],
             options: options,
             validator: {
-                validate: (value: any, validationArguments?: ValidationArguments): boolean => items.some(item => Object.values(item).includes(value)),
+                validate: (value: any, validationArguments?: ValidationArguments): boolean => isOneOfEnums(value, entities, options),
                 defaultMessage: (validationArguments?: ValidationArguments): string => `${propertyName} must be one of enums`
             }
         });
     };
+}
+
+export function isOneOfEnums(value: any, entities: Array<any>, options?: ValidationOptions): boolean {
+    return entities.some(item => Object.values(item).includes(value));
 }
