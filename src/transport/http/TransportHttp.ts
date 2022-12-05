@@ -114,8 +114,8 @@ export class TransportHttp<T extends ITransportHttpSettings = ITransportHttpSett
         return new ExtendedError(`Unknown error`, ExtendedError.DEFAULT_ERROR_CODE, data);
     }
 
-    protected parseAxiosError<U>(data: AxiosError, command: ITransportCommand<U>): ExtendedError {
-        let message = !_.isNil(data.message) ? data.message.toLocaleLowerCase() : ``;
+    protected parseAxiosError<U>(error: AxiosError, command: ITransportCommand<U>): ExtendedError {
+        let message = !_.isNil(error.message) ? error.message.toLocaleLowerCase() : ``;
         if (message.includes(`network error`)) {
             return new TransportNoConnectionError(command);
         }
@@ -123,21 +123,23 @@ export class TransportHttp<T extends ITransportHttpSettings = ITransportHttpSett
             return new TransportTimeoutError(command);
         }
 
-        let response = data.response;
+        let response = error.response;
         if (_.isNil(response)) {
-            return new ExtendedError(`Unknown axios error`, ExtendedError.DEFAULT_ERROR_CODE, data);
+            return new ExtendedError(`Unknown axios error`, ExtendedError.DEFAULT_ERROR_CODE, error);
         }
 
-        if (ExtendedError.instanceOf(response)) {
-            return ExtendedError.create(response);
+        if (ExtendedError.instanceOf(response.data)) {
+            return ExtendedError.create(response.data);
         }
 
         message = response.statusText;
-        
-        let error = _.get(response, 'data.error');
-        if (_.isEmpty(message) && !_.isEmpty(error)) {
-            message = error;
+        if (_.isEmpty(message)) {
+            let error = _.get(response, 'data.error');
+            if (_.isEmpty(message) && !_.isEmpty(error)) {
+                message = error;
+            }
         }
+
         return new ExtendedError(message, response.status, response.data);
     }
 
@@ -168,7 +170,7 @@ export class TransportHttp<T extends ITransportHttpSettings = ITransportHttpSett
             this.observer.next(new ObservableData(LoadableEvent.FINISHED, command));
             return;
         }
-        // Immediately receive the commad
+        // Immediately receive the command
         this.responseReceived(command);
     }
 
