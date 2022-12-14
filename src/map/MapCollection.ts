@@ -116,6 +116,11 @@ export class MapCollection<U> extends Destroyable {
     }
 
     public destroy(): void {
+        if (this.isDestroyed) {
+            return;
+        }
+        super.destroy();
+        
         this.clear();
         this.map = null;
         this._collection = null;
