@@ -33,11 +33,11 @@ export class PaginableBookmark<U> extends Filterable<U> implements IPaginableBoo
     //
     // --------------------------------------------------------------------------
 
-    pageSize: number;
+    public pageSize: number;
 
     @IsString()
-    pageBookmark: string;
+    public pageBookmark: string;
 
     @IsOptional()
-    details?: Array<keyof U>;
+    public details?: Array<keyof U>;
 }

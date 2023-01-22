@@ -1,4 +1,4 @@
-import { classToPlain, ClassTransformOptions, plainToClass } from 'class-transformer';
+import { ClassTransformOptions, instanceToPlain, plainToInstance } from 'class-transformer';
 import * as _ from 'lodash';
 import { DateUtil } from './DateUtil';
 import { ObjectUtil } from './ObjectUtil';
@@ -58,7 +58,7 @@ export class TransformUtil {
     // --------------------------------------------------------------------------
 
     public static fromClass<V = any, U = any>(item: U, options?: ClassTransformOptions): V {
-        return !_.isNil(item) ? (classToPlain(item, options) as any) : null;
+        return !_.isNil(item) ? (instanceToPlain(item, options) as any) : null;
     }
 
     public static fromClassMany<V = any, U = any>(items: Array<U>, options?: ClassTransformOptions): Array<V> {
@@ -74,8 +74,17 @@ export class TransformUtil {
         return items.map(item => TransformUtil.fromClassBuffer(item, options));
     }
 
+    public static fromClassString<U = any>(item: U, options?: ClassTransformOptions): string {
+        let value = TransformUtil.fromClass(item, options);
+        return !_.isNil(value) ? TransformUtil.fromJSON(value) : null;
+    }
+
+    public static fromClassStringMany<U = any>(items: Array<U>, options?: ClassTransformOptions): Array<string> {
+        return items.map(item => TransformUtil.fromClassString(item, options));
+    }
+
     public static toClass<U, V = any>(type: ClassType<U>, item: V, options?: ClassTransformOptions): U {
-        return !_.isNil(item) ? plainToClass<U, any>(type, item, options) : null;
+        return !_.isNil(item) ? plainToInstance<U, any>(type, item, options) : null;
     }
 
     public static toClassMany<U, V = any>(type: ClassType<U>, items: Array<V>, options?: ClassTransformOptions): Array<U> {
@@ -89,6 +98,15 @@ export class TransformUtil {
 
     public static toClassBufferMany<U>(type: ClassType<U>, items: Array<Buffer>, options?: ClassTransformOptions): Array<U> {
         return items.map(item => TransformUtil.toClassBuffer(type, item, options));
+    }
+
+    public static toClassString<U>(type: ClassType<U>, item: string, options?: ClassTransformOptions): U {
+        let value = TransformUtil.toJSON(item);
+        return !_.isNil(value) ? TransformUtil.toClass(type, value, options) : null;
+    }
+
+    public static toClassStringMany<U>(type: ClassType<U>, items: Array<string>, options?: ClassTransformOptions): Array<U> {
+        return items.map(item => TransformUtil.toClassString(type, item, options));
     }
 }
 
