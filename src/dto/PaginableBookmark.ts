@@ -2,8 +2,9 @@ import { IsString, IsOptional } from 'class-validator';
 import * as _ from 'lodash';
 import { IPaginableBookmark } from './IPaginableBookmark';
 import { Filterable } from './Filterable';
+import { IFilterable } from './IFilterable';
 
-export class PaginableBookmark<U> extends Filterable<U> implements IPaginableBookmark<U> {
+export class PaginableBookmark<U, V = any> extends Filterable<U, V> implements IPaginableBookmark<U, V> {
     // --------------------------------------------------------------------------
     //
     //  Constants
@@ -18,12 +19,13 @@ export class PaginableBookmark<U> extends Filterable<U> implements IPaginableBoo
     //
     // --------------------------------------------------------------------------
 
-    public static transform<U>(item: IPaginableBookmark<U>): PaginableBookmark<U> {
+    public static transform<T extends IFilterable<U, V>, U, V>(item: T): T {
+        item = Filterable.transform(item);
         if (_.isNil(item)) {
             return item;
         }
-        item = Filterable.transform(item) as IPaginableBookmark<U>;
-        item.pageSize = !_.isNil(item.pageSize) ? parseInt(item.pageSize.toString(), 10) : PaginableBookmark.DEFAULT_PAGE_SIZE;
+        let pageSize = item['pageSize'];
+        item['pageSize'] = !_.isNil(pageSize) ? parseInt(pageSize.toString(), 10) : PaginableBookmark.DEFAULT_PAGE_SIZE;
         return item;
     }
 

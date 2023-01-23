@@ -11,7 +11,7 @@ export class Filterable<U, V = any> implements IFilterable<U, V> {
     //
     // --------------------------------------------------------------------------
 
-    public static transform<U, V>(item: IFilterable<U, V>): Filterable<U, V> {
+    public static transform<T extends IFilterable<U, V>, U, V>(item: T): T {
         if (_.isNil(item)) {
             return item;
         }
