@@ -48,8 +48,11 @@ export abstract class Transport<T extends ITransportSettings = any> extends Logg
     protected listeners: Map<string, Subject<any>>;
     protected dispatchers: Map<string, Subject<any>>;
 
-    protected _settings: T;
     protected observer: Subject<ObservableData<LoadableEvent, ITransportCommand<any>>>;
+
+    protected _settings: T;
+    protected _logEventFilters: Array<TransportLogEventFilter>;
+    protected _logCommandFilters: Array<TransportLogCommandLogFilter>;
 
     // --------------------------------------------------------------------------
     //
@@ -61,6 +64,9 @@ export abstract class Transport<T extends ITransportSettings = any> extends Logg
         super(logger, context);
 
         this._settings = settings;
+        this._logEventFilters = new Array();
+        this._logCommandFilters = new Array();
+
         this.observer = new Subject();
 
         this.requests = new Map();
@@ -133,6 +139,8 @@ export abstract class Transport<T extends ITransportSettings = any> extends Logg
         this.promises = null;
 
         this._settings = null;
+        this._logEventFilters = null;
+        this._logCommandFilters = null;
     }
 
     // --------------------------------------------------------------------------
@@ -156,14 +164,7 @@ export abstract class Transport<T extends ITransportSettings = any> extends Logg
 
     private verboseData<U>(data: U, type: TransportLogType): void {
         if (!_.isNil(data)) {
-            this.verbose(
-                `${this.getLogMark(type)} ${util.inspect(data, {
-                    colors: true,
-                    showHidden: false,
-                    depth: null,
-                    compact: false
-                })}`
-            );
+            this.verbose(`${this.getLogMark(type)} ${util.inspect(data, { colors: true, showHidden: false, depth: null, compact: false })}`);
         }
     }
 
@@ -303,11 +304,19 @@ export abstract class Transport<T extends ITransportSettings = any> extends Logg
     }
 
     protected logEvent<T>(event: ITransportEvent<T>, type: TransportLogType): void {
+        if (!_.isEmpty(this.logEventFilters) && !this.logEventFilters.every(filter => filter(event, type))) {
+            return;
+        }
+
         this.debug(this.eventToString(event, type));
         this.verboseData(event.data, type);
     }
 
     protected logCommand<U>(command: ITransportCommand<U>, type: TransportLogType): void {
+        if (!_.isEmpty(this.logCommandFilters) && !this.logCommandFilters.every(filter => filter(command, type))) {
+            return;
+        }
+
         this.debug(this.commandToString(command, type));
         switch (type) {
             case TransportLogType.REQUEST_SENDED:
@@ -347,7 +356,15 @@ export abstract class Transport<T extends ITransportSettings = any> extends Logg
     public get settings(): T {
         return this._settings;
     }
-    
+
+    public get logEventFilters(): Array<TransportLogEventFilter> {
+        return this._logEventFilters;
+    }
+
+    public get logCommandFilters(): Array<TransportLogCommandLogFilter> {
+        return this._logCommandFilters;
+    }
+
     public get events(): Observable<ObservableData<LoadableEvent, ITransportCommand<any>>> {
         return this.observer.asObservable();
     }
@@ -364,6 +381,9 @@ export interface ITransportRequestStorage extends ITransportCommandOptions {
     expiredDate: Date;
     isNeedReply: boolean;
 }
+
+export type TransportLogEventFilter = <U = any>(event: ITransportEvent<U>, type: TransportLogType) => boolean;
+export type TransportLogCommandLogFilter = <U = any>(command: ITransportCommand<U>, type: TransportLogType) => boolean;
 
 export enum TransportLogType {
     REQUEST_RECEIVED = 'REQUEST_RECEIVED',
