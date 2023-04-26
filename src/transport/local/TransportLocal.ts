@@ -6,9 +6,10 @@ import { PromiseHandler } from '../../promise';
 import { DateUtil, ObjectUtil } from '../../util';
 import { TransportWaitExceedError } from '../error';
 import { ITransportCommand, ITransportCommandAsync, ITransportCommandOptions, ITransportEvent } from '../ITransport';
-import { ITransportRequestStorage, Transport, TransportLogType } from '../Transport';
+import { ITransportRequestStorage, Transport } from '../Transport';
 import { ITransportSettings } from '../ITransportSettings';
 import { TraceUtil } from '../../trace';
+import { TransportLogType } from '../TransportLogUtil';
 
 export class TransportLocal extends Transport<ITransportSettings> {
     // --------------------------------------------------------------------------

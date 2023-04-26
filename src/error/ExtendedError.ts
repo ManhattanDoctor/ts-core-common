@@ -1,6 +1,8 @@
 import { Exclude, Transform } from 'class-transformer';
 import * as _ from 'lodash';
 import { ObjectUtil, TransformUtil } from '../util';
+import { AxiosError } from 'axios';
+import { IsAxiosError } from './IsAxiosError';
 
 export class ExtendedError<U = any, V = number> extends Error implements Error {
     // --------------------------------------------------------------------------
@@ -47,9 +49,12 @@ export class ExtendedError<U = any, V = number> extends Error implements Error {
     //
     // --------------------------------------------------------------------------
 
-    public static create(item: Error | ExtendedError | any, code?: any): ExtendedError {
+    public static create(item: Error | ExtendedError | AxiosError | any, code?: any): ExtendedError {
         if (item instanceof ExtendedError) {
             return item;
+        }
+        if (IsAxiosError(item)) {
+            return ExtendedError.create(item.response.data);
         }
 
         if (_.isNil(code)) {
@@ -79,8 +84,14 @@ export class ExtendedError<U = any, V = number> extends Error implements Error {
         return new ExtendedError(message, code, details);
     }
 
-    public static instanceOf(data: any): data is ExtendedError {
-        return ObjectUtil.instanceOf<ExtendedError>(data, ['code', 'message', 'details']);
+    public static instanceOf(item: any): item is ExtendedError {
+        if (item instanceof ExtendedError) {
+            return true;
+        }
+        if (IsAxiosError(item)) {
+            return this.instanceOf(item.response.data);
+        }
+        return ObjectUtil.instanceOf<ExtendedError>(item, ['code', 'message', 'details']);
     }
 
     // --------------------------------------------------------------------------

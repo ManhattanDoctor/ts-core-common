@@ -6,12 +6,14 @@ import { ExtendedError } from '../../error/ExtendedError';
 import { ILogger } from '../../logger/ILogger';
 import { ObservableData } from '../../observer/ObservableData';
 import { PromiseHandler } from '../../promise/PromiseHandler';
-import { Transport, TransportLogType } from '../../transport/Transport';
+import { Transport } from '../../transport/Transport';
 import { ITransportCommand, ITransportCommandAsync, ITransportCommandOptions, ITransportEvent } from '../../transport/ITransport';
 import { TransportNoConnectionError, TransportTimeoutError } from '../error';
 import { ITransportHttpRequest } from './ITransportHttpRequest';
 import { ITransportHttpSettings } from './ITransportHttpSettings';
 import { TransportHttpCommandAsync } from './TransportHttpCommandAsync';
+import { IsAxiosError } from '../../error';
+import { TransportLogType } from '../TransportLogUtil';
 
 export class TransportHttp<T extends ITransportHttpSettings = ITransportHttpSettings> extends Transport<T> {
     // --------------------------------------------------------------------------
@@ -20,15 +22,8 @@ export class TransportHttp<T extends ITransportHttpSettings = ITransportHttpSett
     //
     // --------------------------------------------------------------------------
 
-    public static isError(data: any): boolean {
-        return data instanceof ExtendedError || ExtendedError.instanceOf(data) || TransportHttp.isAxiosError(data);
-    }
-
-    public static isAxiosError(data: any): boolean {
-        if (!_.isNil(data)) {
-            return _.isBoolean(data.isAxiosError) ? data.isAxiosError : false;
-        }
-        return false;
+    public static isError(item: any): boolean {
+        return item instanceof ExtendedError || ExtendedError.instanceOf(item) || IsAxiosError(item);
     }
 
     // --------------------------------------------------------------------------
@@ -108,7 +103,7 @@ export class TransportHttp<T extends ITransportHttpSettings = ITransportHttpSett
         if (ExtendedError.instanceOf(data)) {
             return ExtendedError.create(data);
         }
-        if (TransportHttp.isAxiosError(data)) {
+        if (IsAxiosError(data)) {
             return this.parseAxiosError(data, command);
         }
         return new ExtendedError(`Unknown error`, ExtendedError.DEFAULT_ERROR_CODE, data);

@@ -25,6 +25,7 @@ export * from './dto/IUIDable';
 export * from './dto/Paginable';
 export * from './dto/PaginableBookmark';
 //
+export * from './error/IsAxiosError';
 export * from './error/ExtendedError';
 export * from './error/UnreachableStatementError';
 //
@@ -65,6 +66,7 @@ export * from './transport/TransportCommandAsyncHandler';
 export * from './transport/TransportCommandHandler';
 export * from './transport/TransportCommandOptions';
 export * from './transport/TransportEvent';
+export * from './transport/TransportLogUtil';
 export * from './transport/crypto/ITransportCryptoManager';
 export * from './transport/crypto/TransportCryptoManagerEd25519';
 export * from './transport/error/TransportInvalidDataError';

@@ -1,8 +1,7 @@
 import * as _ from 'lodash';
 import { Observable, Subject } from 'rxjs';
 import { tap } from 'rxjs/operators';
-import * as util from 'util';
-import { ExtendedError, UnreachableStatementError } from '../error';
+import { ExtendedError } from '../error';
 import { LoadableEvent } from '../Loadable';
 import { ILogger, LoggerWrapper } from '../logger';
 import { ObservableData } from '../observer';
@@ -11,6 +10,7 @@ import { DateUtil, ObjectUtil } from '../util';
 import { TransportTimeoutError } from './error';
 import { ITransport, ITransportCommand, ITransportCommandAsync, ITransportCommandOptions, ITransportEvent, TransportCommandWaitDelay } from './ITransport';
 import { ITransportSettings } from './ITransportSettings';
+import { TransportLogCommandLogFilter, TransportLogEventFilter, TransportLogType, TransportLogUtil } from './TransportLogUtil';
 
 export abstract class Transport<T extends ITransportSettings = any> extends LoggerWrapper implements ITransport {
     // --------------------------------------------------------------------------
@@ -149,22 +149,9 @@ export abstract class Transport<T extends ITransportSettings = any> extends Logg
     //
     // --------------------------------------------------------------------------
 
-    private eventToString<U>(event: ITransportEvent<U>, type: TransportLogType): string {
-        return `${this.getLogMark(type)} ${event.name}`;
-    }
-
-    private commandToString<U>(command: ITransportCommand<U>, type: TransportLogType): string {
-        let prefix = this.getLogMark(type);
-        let suffix = '•';
-        if (this.isCommandAsync(command) && (!_.isNil(command.error) || !_.isNil(command.data))) {
-            suffix = !this.isCommandHasError(command) ? '✔' : '✘';
-        }
-        return `${prefix} ${command.name} ${suffix} (${command.id})`;
-    }
-
     private verboseData<U>(data: U, type: TransportLogType): void {
         if (!_.isNil(data)) {
-            this.verbose(`${this.getLogMark(type)} ${util.inspect(data, { colors: true, showHidden: false, depth: null, compact: false })}`);
+            this.verbose(TransportLogUtil.verbose(data, type));
         }
     }
 
@@ -175,43 +162,8 @@ export abstract class Transport<T extends ITransportSettings = any> extends Logg
     }
 
     private logResponse<U>(command: ITransportCommand<U>, type: TransportLogType): void {
-        if (_.isNil(command) || !this.isCommandAsync(command)) {
-            return;
-        }
-        this.verboseData(this.isCommandHasError(command) ? command.error : command.data, type);
-    }
-
-    private getLogMark(type: TransportLogType): string {
-        switch (type) {
-            case TransportLogType.REQUEST_SENDED:
-                return '→';
-            case TransportLogType.REQUEST_RECEIVED:
-                return '⇠';
-            case TransportLogType.REQUEST_NO_REPLY:
-                return '⇥';
-            case TransportLogType.REQUEST_EXPIRED:
-                return '↚';
-
-            case TransportLogType.RESPONSE_RECEIVED:
-                return '←';
-            case TransportLogType.RESPONSE_SENDED:
-                return '⇢';
-            case TransportLogType.RESPONSE_NO_REPLY:
-                return '✔';
-            case TransportLogType.RESPONSE_EXPIRED:
-                return '↛';
-            case TransportLogType.RESPONSE_WAIT:
-                return '↺';
-            case TransportLogType.RESPONSE_TIMEOUT:
-                return '⧖';
-
-            case TransportLogType.EVENT_SENDED:
-                return '↦';
-            case TransportLogType.EVENT_RECEIVED:
-                return '↤';
-
-            default:
-                throw new UnreachableStatementError(type);
+        if (!_.isNil(command) && this.isCommandAsync(command)) {
+            this.verboseData(this.isCommandHasError(command) ? command.error : command.data, type);
         }
     }
 
@@ -239,7 +191,7 @@ export abstract class Transport<T extends ITransportSettings = any> extends Logg
 
     protected async commandTimeout<U, V>(command: ITransportCommandAsync<U, V>, options: ITransportCommandOptions): Promise<void> {
         await PromiseHandler.delay(this.getCommandTimeoutDelay(command, options));
-        if (!this.promises.has(command.id)) {
+        if (_.isNil(this.promises) || !this.promises.has(command.id)) {
             return;
         }
         command.response(new TransportTimeoutError(command));
@@ -308,7 +260,7 @@ export abstract class Transport<T extends ITransportSettings = any> extends Logg
             return;
         }
 
-        this.debug(this.eventToString(event, type));
+        this.debug(TransportLogUtil.eventToString(event, type));
         this.verboseData(event.data, type);
     }
 
@@ -317,7 +269,7 @@ export abstract class Transport<T extends ITransportSettings = any> extends Logg
             return;
         }
 
-        this.debug(this.commandToString(command, type));
+        this.debug(TransportLogUtil.commandToString(command, type));
         switch (type) {
             case TransportLogType.REQUEST_SENDED:
             case TransportLogType.REQUEST_RECEIVED:
@@ -380,25 +332,4 @@ export interface ITransportRequestStorage extends ITransportCommandOptions {
     waitCount: number;
     expiredDate: Date;
     isNeedReply: boolean;
-}
-
-export type TransportLogEventFilter = <U = any>(event: ITransportEvent<U>, type: TransportLogType) => boolean;
-export type TransportLogCommandLogFilter = <U = any>(command: ITransportCommand<U>, type: TransportLogType) => boolean;
-
-export enum TransportLogType {
-    REQUEST_RECEIVED = 'REQUEST_RECEIVED',
-    REQUEST_SENDED = 'REQUEST_SENDED',
-    REQUEST_NO_REPLY = 'REQUEST_NO_REPLY',
-    REQUEST_EXPIRED = 'REQUEST_EXPIRED',
-
-    RESPONSE_RECEIVED = 'RESPONSE_RECEIVE',
-    RESPONSE_SENDED = 'RESPONSE_SENDED',
-    RESPONSE_NO_REPLY = 'RESPONSE_NO_REPLY',
-    RESPONSE_EXPIRED = 'RESPONSE_EXPIRED',
-
-    RESPONSE_WAIT = 'RESPONSE_WAIT',
-    RESPONSE_TIMEOUT = 'RESPONSE_TIMEOUT',
-
-    EVENT_SENDED = 'EVENT_SENDED',
-    EVENT_RECEIVED = 'EVENT_RECEIVED'
 }
