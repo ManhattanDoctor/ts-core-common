@@ -87,13 +87,12 @@ export class ExtendedError<U = any, V = number> extends Error implements Error {
 
     public code: V;
     public message: string;
-    public isFatal: boolean;
 
     @Exclude({ toPlainOnly: true })
     public stack: string;
 
-    @Transform(params => (!_.isNil(params.value) ? TransformUtil.toJSON(params.value) : null), { toClassOnly: true })
-    @Transform(params => (!_.isNil(params.value) ? TransformUtil.fromJSON(params.value) : null), { toPlainOnly: true })
+    // @Transform(params => (!_.isNil(params.value) ? TransformUtil.toJSON(params.value) : null), { toClassOnly: true })
+    // @Transform(params => (!_.isNil(params.value) ? TransformUtil.fromJSON(params.value) : null), { toPlainOnly: true })
     public details: U;
 
     // --------------------------------------------------------------------------
@@ -102,7 +101,7 @@ export class ExtendedError<U = any, V = number> extends Error implements Error {
     //
     // --------------------------------------------------------------------------
 
-    constructor(message: string, code: V = null, details: U = null, isFatal: boolean = true) {
+    constructor(message: string, code: V = null, details: U = null) {
         super(message);
         Object.defineProperty(this, 'stack', { enumerable: true, writable: true });
         Object.defineProperty(this, 'message', { enumerable: true, writable: true });
@@ -110,7 +109,6 @@ export class ExtendedError<U = any, V = number> extends Error implements Error {
         this.code = !_.isNil(code) ? code : (ExtendedError.DEFAULT_ERROR_CODE as any);
         this.message = message;
         this.details = details;
-        this.isFatal = _.isBoolean(isFatal) ? isFatal : true;
     }
 
     // --------------------------------------------------------------------------

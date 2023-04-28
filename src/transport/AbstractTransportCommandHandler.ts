@@ -37,6 +37,6 @@ export abstract class AbstractTransportCommandHandler<U, T extends ITransportCom
             error = new ExtendedError(error);
         }
         this.transport.complete(command, error);
-        this.error(error, ExtendedError.instanceOf(error) && !error.isFatal ? '' : error.stack);
+        this.error(error, error.stack);
     }
 }
