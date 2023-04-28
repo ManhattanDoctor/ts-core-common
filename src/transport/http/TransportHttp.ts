@@ -96,10 +96,7 @@ export class TransportHttp<T extends ITransportHttpSettings = ITransportHttpSett
     }
 
     protected parseError<U>(data: any, command: ITransportCommand<U>): ExtendedError {
-        if (data instanceof ExtendedError) {
-            return data;
-        }
-        if (ExtendedError.instanceOf(data)) {
+        if (ExtendedError.instanceOf(data) || data instanceof Error) {
             return ExtendedError.create(data);
         }
         if (isAxiosError(data)) {

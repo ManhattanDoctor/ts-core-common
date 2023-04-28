@@ -51,6 +51,9 @@ export class ExtendedError<U = any, V = number> extends Error implements Error {
         if (item instanceof ExtendedError) {
             return item;
         }
+        if (ExtendedError.instanceOf(item)) {
+            return TransformUtil.toClass(ExtendedError, item);
+        }
         if (_.isNil(code)) {
             code = ExtendedError.DEFAULT_ERROR_CODE;
         }
@@ -62,7 +65,7 @@ export class ExtendedError<U = any, V = number> extends Error implements Error {
             return new ExtendedError(message, code, item.stack);
         }
 
-        let message = !_.isNil(item.message)? item.message : ExtendedError.DEFAULT_ERROR_MESSAGE;
+        let message = !_.isNil(item.message) ? item.message : ExtendedError.DEFAULT_ERROR_MESSAGE;
         if (!_.isNil(item.code)) {
             code = item.code;
         }
