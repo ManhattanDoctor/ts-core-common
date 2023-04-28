@@ -1,8 +1,6 @@
 import { Exclude, Transform } from 'class-transformer';
-import * as _ from 'lodash';
 import { ObjectUtil, TransformUtil } from '../util';
-import { AxiosError } from 'axios';
-import { IsAxiosError } from './IsAxiosError';
+import * as _ from 'lodash';
 
 export class ExtendedError<U = any, V = number> extends Error implements Error {
     // --------------------------------------------------------------------------
@@ -49,47 +47,31 @@ export class ExtendedError<U = any, V = number> extends Error implements Error {
     //
     // --------------------------------------------------------------------------
 
-    public static create(item: Error | ExtendedError | AxiosError | any, code?: any): ExtendedError {
+    public static create(item: Error | ExtendedError | any, code?: any): ExtendedError {
         if (item instanceof ExtendedError) {
             return item;
         }
-        if (IsAxiosError(item)) {
-            return ExtendedError.create(item.response.data);
-        }
-
         if (_.isNil(code)) {
             code = ExtendedError.DEFAULT_ERROR_CODE;
         }
-        let details = null;
-        let message = null;
         if (item instanceof Error) {
-            details = item.stack;
-            message = item.message;
+            let message = item.message;
             if (!_.isEmpty(item.name)) {
                 message = `[${item.name}] ${message}`;
             }
-            return new ExtendedError(message, code, details);
+            return new ExtendedError(message, code, item.stack);
         }
 
-        message = ExtendedError.DEFAULT_ERROR_MESSAGE;
+        let message = !_.isNil(item.message)? item.message : ExtendedError.DEFAULT_ERROR_MESSAGE;
         if (!_.isNil(item.code)) {
             code = item.code;
         }
-        if (!_.isNil(item.message)) {
-            message = item.message;
-        }
-        if (!_.isNil(item.details)) {
-            details = item.details;
-        }
-        return new ExtendedError(message, code, details);
+        return new ExtendedError(message, code, item.details);
     }
 
     public static instanceOf(item: any): item is ExtendedError {
         if (item instanceof ExtendedError) {
             return true;
-        }
-        if (IsAxiosError(item)) {
-            return this.instanceOf(item.response.data);
         }
         return ObjectUtil.instanceOf<ExtendedError>(item, ['code', 'message', 'details']);
     }

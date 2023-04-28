@@ -8,11 +8,10 @@ import { ObservableData } from '../../observer/ObservableData';
 import { PromiseHandler } from '../../promise/PromiseHandler';
 import { Transport } from '../../transport/Transport';
 import { ITransportCommand, ITransportCommandAsync, ITransportCommandOptions, ITransportEvent } from '../../transport/ITransport';
-import { TransportNoConnectionError, TransportTimeoutError } from '../error';
 import { ITransportHttpRequest } from './ITransportHttpRequest';
 import { ITransportHttpSettings } from './ITransportHttpSettings';
 import { TransportHttpCommandAsync } from './TransportHttpCommandAsync';
-import { IsAxiosError } from '../../error';
+import { isAxiosError, parseAxiosError } from '../../error/Axios';
 import { TransportLogType } from '../TransportLogUtil';
 
 export class TransportHttp<T extends ITransportHttpSettings = ITransportHttpSettings> extends Transport<T> {
@@ -23,7 +22,7 @@ export class TransportHttp<T extends ITransportHttpSettings = ITransportHttpSett
     // --------------------------------------------------------------------------
 
     public static isError(item: any): boolean {
-        return item instanceof ExtendedError || ExtendedError.instanceOf(item) || IsAxiosError(item);
+        return ExtendedError.instanceOf(item) || isAxiosError(item);
     }
 
     // --------------------------------------------------------------------------
@@ -103,40 +102,24 @@ export class TransportHttp<T extends ITransportHttpSettings = ITransportHttpSett
         if (ExtendedError.instanceOf(data)) {
             return ExtendedError.create(data);
         }
-        if (IsAxiosError(data)) {
-            return this.parseAxiosError(data, command);
+        if (isAxiosError(data)) {
+            return parseAxiosError(data);
         }
         return new ExtendedError(`Unknown error`, ExtendedError.DEFAULT_ERROR_CODE, data);
     }
 
-    protected parseAxiosError<U>(error: AxiosError, command: ITransportCommand<U>): ExtendedError {
-        let message = !_.isNil(error.message) ? error.message.toLocaleLowerCase() : ``;
+    /*
+    protected parseAxiosError<U>(item: AxiosError, command: ITransportCommand<U>): ExtendedError {
+        let message = !_.isNil(item.message) ? item.message.toLocaleLowerCase() : ``;
         if (message.includes(`network error`)) {
             return new TransportNoConnectionError(command);
         }
         if (message.includes(`timeout of`)) {
             return new TransportTimeoutError(command);
         }
-
-        let response = error.response;
-        if (_.isNil(response)) {
-            return new ExtendedError(`Unknown axios error`, ExtendedError.DEFAULT_ERROR_CODE, error);
-        }
-
-        if (ExtendedError.instanceOf(response.data)) {
-            return ExtendedError.create(response.data);
-        }
-
-        message = response.statusText;
-        if (_.isEmpty(message)) {
-            let error = _.get(response, 'data.error');
-            if (_.isEmpty(message) && !_.isEmpty(error)) {
-                message = error;
-            }
-        }
-
-        return new ExtendedError(message, response.status, response.data);
+        return parseAxiosError(item);
     }
+    */
 
     // --------------------------------------------------------------------------
     //

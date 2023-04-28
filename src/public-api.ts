@@ -25,7 +25,7 @@ export * from './dto/IUIDable';
 export * from './dto/Paginable';
 export * from './dto/PaginableBookmark';
 //
-export * from './error/IsAxiosError';
+export * from './error/Axios';
 export * from './error/ExtendedError';
 export * from './error/UnreachableStatementError';
 //
