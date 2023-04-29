@@ -83,9 +83,10 @@ export class ExtendedError<U = any, V = number> extends Error implements Error {
     // --------------------------------------------------------------------------
 
     public code: V;
-    public details: U;
     public message: string;
     public isExtendedError: boolean;
+
+    public details?: U;
 
     @Exclude({ toPlainOnly: true })
     public stack: string;
@@ -99,15 +100,18 @@ export class ExtendedError<U = any, V = number> extends Error implements Error {
     //
     // --------------------------------------------------------------------------
 
-    constructor(message: string, code: V = null, details: U = null) {
+    constructor(message: string, code?: V, details?: U) {
         super(message);
         Object.defineProperty(this, 'stack', { enumerable: true, writable: true });
         Object.defineProperty(this, 'message', { enumerable: true, writable: true });
 
         this.code = !_.isNil(code) ? code : ExtendedError.DEFAULT_ERROR_CODE as any;
         this.message = message;
-        this.details = details;
         this.isExtendedError = true;
+
+        if (!_.isNil(details)) {
+            this.details = details;
+        }
     }
 
     // --------------------------------------------------------------------------
