@@ -1,13 +1,24 @@
 import { ExtendedError } from '../../error';
+import * as _ from 'lodash';
 
-export class TransportWaitError<T = any> extends ExtendedError<T> {
+export class TransportWaitError extends ExtendedError<void, string> {
     // --------------------------------------------------------------------------
     //
     //  Constants
     //
     // --------------------------------------------------------------------------
 
-    public static ERROR_CODE = 5000;
+    public static ERROR_CODE = 'TRANSPORT_WAIT_ERROR';
+
+    // --------------------------------------------------------------------------
+    //
+    //  Static Methods
+    //
+    // --------------------------------------------------------------------------
+
+    public static instanceOf(data: any): data is TransportWaitError {
+        return data instanceof TransportWaitError || data.code === TransportWaitError.ERROR_CODE;
+    }
 
     // --------------------------------------------------------------------------
     //

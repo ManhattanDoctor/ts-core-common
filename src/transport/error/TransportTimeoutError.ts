@@ -1,14 +1,14 @@
 import { ExtendedError } from '../../error';
 import { ITransportCommand } from '../ITransport';
 
-export class TransportTimeoutError<U> extends ExtendedError<ITransportCommand<U>> {
+export class TransportTimeoutError<U> extends ExtendedError<ITransportCommand<U>, string> {
     // --------------------------------------------------------------------------
     //
     //  Constants
     //
     // --------------------------------------------------------------------------
 
-    public static ERROR_CODE = 5001;
+    public static ERROR_CODE = 'TRANSPORT_TIMEOUT_ERROR';
 
     // --------------------------------------------------------------------------
     //

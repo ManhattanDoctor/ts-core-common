@@ -1,13 +1,13 @@
 import { ExtendedError } from '../../error';
 
-export class TransportInvalidDataError extends ExtendedError {
+export class TransportInvalidDataError extends ExtendedError<void, string> {
     // --------------------------------------------------------------------------
     //
     //  Constants
     //
     // --------------------------------------------------------------------------
 
-    public static ERROR_CODE = 5004;
+    public static ERROR_CODE = 'TRANSPORT_INVALID_DATA';
 
     // --------------------------------------------------------------------------
     //

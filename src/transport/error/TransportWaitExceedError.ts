@@ -1,14 +1,14 @@
 import { ExtendedError } from '../../error';
 import { ITransportCommand } from '../ITransport';
 
-export class TransportWaitExceedError<U = any> extends ExtendedError<ITransportCommand<U>> {
+export class TransportWaitExceedError<U = any> extends ExtendedError<ITransportCommand<U>, string> {
     // --------------------------------------------------------------------------
     //
     //  Constants
     //
     // --------------------------------------------------------------------------
 
-    public static ERROR_CODE = 5003;
+    public static ERROR_CODE = 'TRANSPORT_WAIT_EXCEED_ERROR';
 
     // --------------------------------------------------------------------------
     //

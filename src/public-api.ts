@@ -54,7 +54,7 @@ export * from './settings/AbstractSettingsStorage';
 export * from './trace/ITraceable';
 export * from './trace/TraceUtil';
 //
-export * from './transport/AbstractTransportCommandHandler';
+export * from './transport/TransportCommandHandlerAbstract';
 export * from './transport/ITransport';
 export * from './transport/ITransportRequest';
 export * from './transport/ITransportResponse';

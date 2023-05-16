@@ -1,13 +1,13 @@
 import { ExtendedError } from './ExtendedError';
 
-export class UnreachableStatementError extends ExtendedError {
+export class UnreachableStatementError extends ExtendedError<void, string> {
     // --------------------------------------------------------------------------
     //
     //  Constants
     //
     // --------------------------------------------------------------------------
 
-    public static ERROR_CODE = -1001;
+    public static ERROR_CODE = 'UNREACHABLE_STATEMENT_ERROR';
 
     // --------------------------------------------------------------------------
     //
