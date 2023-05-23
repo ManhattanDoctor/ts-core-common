@@ -68,6 +68,7 @@ export * from './transport/TransportCommandOptions';
 export * from './transport/TransportEvent';
 export * from './transport/TransportLogUtil';
 export * from './transport/crypto/ITransportCryptoManager';
+export * from './transport/crypto/TransportCryptoManager';
 export * from './transport/crypto/TransportCryptoManagerEd25519';
 export * from './transport/error/TransportInvalidDataError';
 export * from './transport/error/TransportNoConnectionError';
