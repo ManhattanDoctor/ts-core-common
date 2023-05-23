@@ -1,30 +1,11 @@
-import { v4 as uuid } from 'uuid';
+
 import { ITransportCommand } from './ITransport';
-import { IsString, IsDefined } from 'class-validator';
-import * as _ from 'lodash';
 import { ValidateUtil } from '../util';
-import { ITransportCryptoManager } from './crypto';
-import { IKeyAsymmetric, ISignature } from '../crypto';
+import { IsString, IsDefined } from 'class-validator';
+import { v4 as uuid } from 'uuid';
+import * as _ from 'lodash';
 
 export class TransportCommand<T> implements ITransportCommand<T> {
-    // --------------------------------------------------------------------------
-    //
-    //  Static Methods
-    //
-    // --------------------------------------------------------------------------
-
-    public static async sign<U>(command: ITransportCommand<U>, manager: ITransportCryptoManager, key: IKeyAsymmetric, nonce?: string): Promise<ISignature> {
-        if (_.isNil(nonce)) {
-            nonce = Date.now().toString();
-        }
-        return {
-            value: await manager.sign(command, nonce, key.privateKey),
-            publicKey: key.publicKey,
-            algorithm: manager.algorithm,
-            nonce
-        };
-    }
-
     // --------------------------------------------------------------------------
     //
     //  Properties
