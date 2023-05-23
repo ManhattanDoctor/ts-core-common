@@ -12,11 +12,14 @@ export abstract class TransportCryptoManager implements ITransportCryptoManager 
     // --------------------------------------------------------------------------
 
     public static async sign<U>(command: ITransportCommand<U>, manager: ITransportCryptoManager, key: IKeyAsymmetric, nonce?: string): Promise<ISignature> {
+        if (_.isNil(nonce)) {
+            nonce = Date.now().toString();
+        }
         return {
             value: await manager.sign(command, nonce, key.privateKey),
             publicKey: key.publicKey,
             algorithm: manager.algorithm,
-            nonce: !_.isNil(nonce) ? nonce : Date.now().toString()
+            nonce
         }
     }
 
@@ -31,9 +34,9 @@ export abstract class TransportCryptoManager implements ITransportCryptoManager 
     // --------------------------------------------------------------------------
 
     abstract sign<U>(command: ITransportCommand<U>, nonce: string, privateKey: string): Promise<string>;
-    
+
     abstract verify<U>(command: ITransportCommand<U>, signature: ISignature): Promise<boolean>;
-    
+
     abstract readonly algorithm: string;
 
     // --------------------------------------------------------------------------
