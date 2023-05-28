@@ -29,6 +29,21 @@ export abstract class Transport<S extends ITransportSettings = ITransportSetting
     //
     // --------------------------------------------------------------------------
 
+    public static setDefaultOptions(item: ITransportCommandOptions): void {
+        if (_.isNil(item)) {
+            return;
+        }
+        if (_.isNil(item.waitDelay)) {
+            item.waitDelay = Transport.DEFAULT_WAIT_DELAY;
+        }
+        if (_.isNil(item.waitMaxCount)) {
+            item.waitMaxCount = Transport.DEFAULT_WAIT_MAX_COUNT;
+        }
+        if (_.isNil(item.defaultTimeout)) {
+            item.defaultTimeout = Transport.DEFAULT_TIMEOUT;
+        }
+    }
+    
     public static clearDefaultOptions(item: ITransportCommandOptions): void {
         if (_.isNil(item)) {
             return;

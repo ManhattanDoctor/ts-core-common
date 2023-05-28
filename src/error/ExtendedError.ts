@@ -1,4 +1,4 @@
-import { Exclude, Transform } from 'class-transformer';
+import { Exclude } from 'class-transformer';
 import { ObjectUtil, TransformUtil } from '../util';
 import * as _ from 'lodash';
 
@@ -90,9 +90,6 @@ export class ExtendedError<U = any, V = number> extends Error implements Error {
 
     @Exclude({ toPlainOnly: true })
     public stack: string;
-
-    // @Transform(params => (!_.isNil(params.value) ? TransformUtil.toJSON(params.value) : null), { toClassOnly: true })
-    // @Transform(params => (!_.isNil(params.value) ? TransformUtil.fromJSON(params.value) : null), { toPlainOnly: true })
 
     // --------------------------------------------------------------------------
     //
