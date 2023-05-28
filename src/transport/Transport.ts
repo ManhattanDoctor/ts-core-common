@@ -1,6 +1,6 @@
 import * as _ from 'lodash';
 import { Observable, Subject } from 'rxjs';
-import { tap } from 'rxjs/operators';
+import { takeUntil } from 'rxjs/operators';
 import { ExtendedError } from '../error';
 import { LoadableEvent } from '../Loadable';
 import { ILogger, LoggerWrapper } from '../logger';
@@ -8,11 +8,11 @@ import { ObservableData } from '../observer';
 import { PromiseHandler } from '../promise';
 import { DateUtil, ObjectUtil } from '../util';
 import { TransportTimeoutError } from './error';
-import { ITransport, ITransportCommand, ITransportCommandAsync, ITransportCommandOptions, ITransportEvent, TransportCommandWaitDelay } from './ITransport';
 import { ITransportSettings } from './ITransportSettings';
+import { ITransport, ITransportCommand, ITransportCommandAsync, ITransportCommandOptions, ITransportEvent, TransportCommandWaitDelay } from './ITransport';
 import { TransportLogCommandLogFilter, TransportLogEventFilter, TransportLogType, TransportLogUtil } from './TransportLogUtil';
 
-export abstract class Transport<T extends ITransportSettings = any> extends LoggerWrapper implements ITransport {
+export abstract class Transport<S extends ITransportSettings = ITransportSettings, O extends ITransportCommandOptions = ITransportCommandOptions, R extends ITransportCommandRequest = ITransportCommandRequest> extends LoggerWrapper implements ITransport {
     // --------------------------------------------------------------------------
     //
     //  Constants
@@ -29,6 +29,21 @@ export abstract class Transport<T extends ITransportSettings = any> extends Logg
     //
     // --------------------------------------------------------------------------
 
+    public static clearDefaultOptions(item: ITransportCommandOptions): void {
+        if (_.isNil(item)) {
+            return;
+        }
+        if (item.defaultTimeout === Transport.DEFAULT_TIMEOUT) {
+            delete item.defaultTimeout;
+        }
+        if (item.waitDelay === Transport.DEFAULT_WAIT_DELAY) {
+            delete item.waitDelay;
+        }
+        if (item.waitMaxCount === Transport.DEFAULT_WAIT_MAX_COUNT) {
+            delete item.waitMaxCount;
+        }
+    }
+
     public static isCommandAsync<U, V = any>(command: ITransportCommand<U>): command is ITransportCommandAsync<U, V> {
         return ObjectUtil.instanceOf(command, ['id', 'name', 'response']);
     }
@@ -43,14 +58,14 @@ export abstract class Transport<T extends ITransportSettings = any> extends Logg
     //
     // --------------------------------------------------------------------------
 
-    protected requests: Map<string, ITransportRequestStorage>;
-    protected promises: Map<string, ITransportPromise>;
+    protected requests: Map<string, R>;
+    protected promises: Map<string, ITransportCommandPromise<any, any, O>>;
     protected listeners: Map<string, Subject<any>>;
     protected dispatchers: Map<string, Subject<any>>;
 
     protected observer: Subject<ObservableData<LoadableEvent, ITransportCommand<any>>>;
 
-    protected _settings: T;
+    protected _settings: S;
     protected _logEventFilters: Array<TransportLogEventFilter>;
     protected _logCommandFilters: Array<TransportLogCommandLogFilter>;
 
@@ -60,7 +75,7 @@ export abstract class Transport<T extends ITransportSettings = any> extends Logg
     //
     // --------------------------------------------------------------------------
 
-    constructor(logger: ILogger, settings?: T, context?: string) {
+    constructor(logger: ILogger, settings?: S, context?: string) {
         super(logger, context);
 
         this._settings = settings;
@@ -77,23 +92,38 @@ export abstract class Transport<T extends ITransportSettings = any> extends Logg
 
     // --------------------------------------------------------------------------
     //
-    //  Abstract Methods
+    //  ITransportSender
     //
     // --------------------------------------------------------------------------
 
-    public abstract send<U>(command: ITransportCommand<U>, options?: ITransportCommandOptions): void;
-    public abstract sendListen<U, V>(command: ITransportCommandAsync<U, V>, options?: ITransportCommandOptions): Promise<V>;
+    public abstract send<U>(command: ITransportCommand<U>, options?: O): void;
+
+    public abstract sendListen<U, V>(command: ITransportCommandAsync<U, V>, options?: O): Promise<V>;
+
+    public getDispatcher<T>(name: string): Observable<T> {
+        let subject = this.dispatchers.get(name);
+        if (!_.isNil(subject)) {
+            return subject.asObservable();
+        }
+        subject = new Subject<T>();
+        this.dispatchers.set(name, subject);
+
+        let item = subject.asObservable();
+        item.pipe(takeUntil(this.destroyed)).subscribe(item => this.logEvent(item, TransportLogType.EVENT_RECEIVED));
+        return item;
+    }
+
+    // --------------------------------------------------------------------------
+    //
+    //  ITransportReceiver
+    //
+    // --------------------------------------------------------------------------
 
     public abstract wait<U>(command: ITransportCommand<U>): void;
+
     public abstract complete<U, V>(command: ITransportCommand<U>, result?: V | Error): void;
 
     public abstract dispatch<T>(event: ITransportEvent<T>): void;
-
-    // --------------------------------------------------------------------------
-    //
-    //  Public Methods
-    //
-    // --------------------------------------------------------------------------
 
     public listen<U>(name: string): Observable<U> {
         if (this.listeners.has(name)) {
@@ -106,14 +136,11 @@ export abstract class Transport<T extends ITransportSettings = any> extends Logg
         return item.asObservable();
     }
 
-    public getDispatcher<T>(name: string): Observable<T> {
-        let item = this.dispatchers.get(name);
-        if (_.isNil(item)) {
-            item = new Subject<T>();
-            this.dispatchers.set(name, item);
-        }
-        return item.asObservable().pipe(tap(event => this.logEvent(event, TransportLogType.EVENT_RECEIVED)));
-    }
+    // --------------------------------------------------------------------------
+    //
+    //  Public Methods
+    //
+    // --------------------------------------------------------------------------
 
     public destroy(): void {
         if (this.isDestroyed) {
@@ -121,50 +148,36 @@ export abstract class Transport<T extends ITransportSettings = any> extends Logg
         }
         super.destroy();
 
-        this.requests.clear();
-        this.requests = null;
+        if (!_.isNil(this.requests)) {
+            this.requests.clear();
+            this.requests = null;
+        }
 
-        this.listeners.forEach(item => item.complete());
-        this.listeners.clear();
-        this.listeners = null;
+        if (!_.isNil(this.listeners)) {
+            this.listeners.forEach(item => item.complete());
+            this.listeners.clear();
+            this.listeners = null;
+        }
 
-        this.dispatchers.forEach(item => item.complete());
-        this.dispatchers.clear();
-        this.dispatchers = null;
+        if (!_.isNil(this.dispatchers)) {
+            this.dispatchers.forEach(item => item.complete());
+            this.dispatchers.clear();
+            this.dispatchers = null;
+        }
 
-        this.observer.complete();
-        this.observer = null;
+        if (!_.isNil(this.observer)) {
+            this.observer.complete();
+            this.observer = null;
+        }
 
-        this.promises.clear();
-        this.promises = null;
+        if (!_.isNil(this.promises)) {
+            this.promises.clear();
+            this.promises = null;
+        }
 
         this._settings = null;
         this._logEventFilters = null;
         this._logCommandFilters = null;
-    }
-
-    // --------------------------------------------------------------------------
-    //
-    //  Private Methods
-    //
-    // --------------------------------------------------------------------------
-
-    private verboseData<U>(data: U, type: TransportLogType): void {
-        if (!_.isNil(data)) {
-            this.verbose(TransportLogUtil.verbose(data, type));
-        }
-    }
-
-    private logRequest<U>(command: ITransportCommand<U>, type: TransportLogType): void {
-        if (!_.isNil(command)) {
-            this.verboseData(command.request, type);
-        }
-    }
-
-    private logResponse<U>(command: ITransportCommand<U>, type: TransportLogType): void {
-        if (!_.isNil(command) && this.isCommandAsync(command)) {
-            this.verboseData(this.isCommandHasError(command) ? command.error : command.data, type);
-        }
     }
 
     // --------------------------------------------------------------------------
@@ -189,7 +202,7 @@ export abstract class Transport<T extends ITransportSettings = any> extends Logg
         this.observer.next(new ObservableData(LoadableEvent.FINISHED, command));
     }
 
-    protected async commandTimeout<U, V>(command: ITransportCommandAsync<U, V>, options: ITransportCommandOptions): Promise<void> {
+    protected async commandTimeout<U, V>(command: ITransportCommandAsync<U, V>, options: O): Promise<void> {
         await PromiseHandler.delay(this.getCommandTimeoutDelay(command, options));
         if (_.isNil(this.promises) || !this.promises.has(command.id)) {
             return;
@@ -207,42 +220,44 @@ export abstract class Transport<T extends ITransportSettings = any> extends Logg
         return Transport.isCommandHasError(command);
     }
 
-    protected getCommandOptions<U>(command: ITransportCommand<U>, options?: ITransportCommandOptions): ITransportCommandOptions {
+    protected getCommandOptions<U>(command: ITransportCommand<U>, options?: O): O {
         if (_.isNil(options)) {
-            options = {};
+            options = {} as O;
         }
-
-        if (_.isNil(options.timeout)) {
-            options.timeout = this.getSettingsValue('defaultTimeout', Transport.DEFAULT_TIMEOUT);
-        }
-        if (_.isNil(options.waitDelay) || !(options.waitDelay in TransportCommandWaitDelay)) {
-            options.waitDelay = this.getSettingsValue('defaultWaitDelay', Transport.DEFAULT_WAIT_DELAY);
-        }
-        if (_.isNil(options.waitMaxCount)) {
-            options.waitMaxCount = this.getSettingsValue('defaultWaitMaxCount', Transport.DEFAULT_WAIT_MAX_COUNT);
+        if (_.isNil(options.defaultTimeout)) {
+            options.defaultTimeout = this.getSettingsValue('defaultTimeout', Transport.DEFAULT_TIMEOUT);
         }
         return options;
     }
 
-    protected getCommandTimeoutDelay<U>(command: ITransportCommand<U>, options: ITransportCommandOptions): number {
-        if (_.isNil(options) || _.isNil(options.timeout)) {
-            return Transport.DEFAULT_TIMEOUT;
-        }
-        return options.timeout;
+    protected addCommandPromise<U, V>(command: ITransportCommandAsync<U, V>, options: O): ITransportCommandPromise<U, V, O> {
+        let item = { command, handler: PromiseHandler.create<V, ExtendedError>(), options };
+        this.promises.set(command.id, item);
+        return item;
     }
 
-    protected isRequestWaitExpired(request: ITransportRequestStorage): boolean {
+    // --------------------------------------------------------------------------
+    //
+    //  Timeout Methods
+    //
+    // --------------------------------------------------------------------------
+
+    protected getCommandTimeoutDelay<U>(command: ITransportCommand<U>, options: O): number {
+        return !_.isNil(options) && _.isNil(options.defaultTimeout) ? options.defaultTimeout : Transport.DEFAULT_TIMEOUT;
+    }
+
+    protected isCommandRequestExpired(request: R): boolean {
+        return !_.isNil(request.expiredDate) ? Date.now() > request.expiredDate.getTime() : false;
+    }
+
+    protected isCommandRequestWaitExpired(request: R): boolean {
         if (!_.isNil(request.waitMaxCount) && request.waitCount >= request.waitMaxCount) {
             return true;
         }
-        if (request.waitCount * request.waitDelay >= request.timeout) {
+        if (request.waitCount * request.waitDelay >= request.defaultTimeout) {
             return true;
         }
         return false;
-    }
-
-    protected isRequestExpired(request: ITransportRequestStorage): boolean {
-        return !_.isNil(request.expiredDate) ? Date.now() > request.expiredDate.getTime() : false;
     }
 
     // --------------------------------------------------------------------------
@@ -259,16 +274,14 @@ export abstract class Transport<T extends ITransportSettings = any> extends Logg
         if (!_.isEmpty(this.logEventFilters) && !this.logEventFilters.every(filter => filter(event, type))) {
             return;
         }
-
         this.debug(TransportLogUtil.eventToString(event, type));
-        this.verboseData(event.data, type);
+        this.logVerboseData(event.data, type);
     }
 
     protected logCommand<U>(command: ITransportCommand<U>, type: TransportLogType): void {
         if (!_.isEmpty(this.logCommandFilters) && !this.logCommandFilters.every(filter => filter(command, type))) {
             return;
         }
-
         this.debug(TransportLogUtil.commandToString(command, type));
         switch (type) {
             case TransportLogType.REQUEST_SENDED:
@@ -285,18 +298,34 @@ export abstract class Transport<T extends ITransportSettings = any> extends Logg
         }
     }
 
+    protected logRequest<U>(command: ITransportCommand<U>, type: TransportLogType): void {
+        if (!_.isNil(command)) {
+            this.logVerboseData(command.request, type);
+        }
+    }
+
+    protected logResponse<U>(command: ITransportCommand<U>, type: TransportLogType): void {
+        if (!_.isNil(command) && this.isCommandAsync(command)) {
+            this.logVerboseData(this.isCommandHasError(command) ? command.error : command.data, type);
+        }
+    }
+
+    protected logVerboseData<U>(data: U, type: TransportLogType): void {
+        if (!_.isNil(data)) {
+            this.verbose(TransportLogUtil.verbose(data, type));
+        }
+    }
+
+
     // --------------------------------------------------------------------------
     //
     //  Protected Properties
     //
     // --------------------------------------------------------------------------
 
-    protected getSettingsValue<P extends keyof T>(name: P, defaultValue?: T[P]): T[P] {
+    protected getSettingsValue<P extends keyof S>(name: P, defaultValue?: S[P]): S[P] {
         let value = !_.isNil(this.settings) ? this.settings[name] : null;
-        if (_.isNil(value)) {
-            value = defaultValue;
-        }
-        return value;
+        return !_.isNil(value) ? value : defaultValue;
     }
 
     // --------------------------------------------------------------------------
@@ -305,7 +334,7 @@ export abstract class Transport<T extends ITransportSettings = any> extends Logg
     //
     // --------------------------------------------------------------------------
 
-    public get settings(): T {
+    public get settings(): S {
         return this._settings;
     }
 
@@ -322,13 +351,13 @@ export abstract class Transport<T extends ITransportSettings = any> extends Logg
     }
 }
 
-export interface ITransportPromise<U = any, V = any> {
+export interface ITransportCommandPromise<U = any, V = any, O extends ITransportCommandOptions = ITransportCommandOptions> {
     handler: PromiseHandler<V, ExtendedError>;
     command: ITransportCommandAsync<U, V>;
-    options: ITransportCommandOptions;
+    options: O;
 }
 
-export interface ITransportRequestStorage extends ITransportCommandOptions {
+export interface ITransportCommandRequest extends ITransportCommandOptions {
     waitCount: number;
     expiredDate: Date;
     isNeedReply: boolean;

@@ -4,12 +4,12 @@ import { LoadableEvent } from '../../Loadable';
 import { ObservableData } from '../../observer';
 import { PromiseHandler } from '../../promise';
 import { DateUtil, ObjectUtil } from '../../util';
-import { TransportWaitExceedError } from '../error';
 import { ITransportCommand, ITransportCommandAsync, ITransportCommandOptions, ITransportEvent } from '../ITransport';
-import { ITransportRequestStorage, Transport } from '../Transport';
+import { ITransportCommandRequest, Transport } from '../Transport';
 import { ITransportSettings } from '../ITransportSettings';
 import { TraceUtil } from '../../trace';
 import { TransportLogType } from '../TransportLogUtil';
+import { TransportWaitExceedError } from '../error';
 
 export class TransportLocal extends Transport<ITransportSettings> {
     // --------------------------------------------------------------------------
@@ -35,6 +35,20 @@ export class TransportLocal extends Transport<ITransportSettings> {
         return handler.promise;
     }
 
+    public wait<U>(command: ITransportCommand<U>): void {
+        let request = this.requests.get(command.id);
+        if (_.isNil(request)) {
+            throw new ExtendedError(`Unable to wait "${command.name}" command: can't find request details`);
+        }
+
+        if (this.isCommandRequestWaitExpired(request)) {
+            this.complete(command, new TransportWaitExceedError(command));
+            return;
+        }
+
+        this.waitSend(command, request);
+    }
+
     public complete<U, V>(command: ITransportCommand<U>, result?: V | Error): void {
         let request = this.requests.get(command.id);
         this.requests.delete(command.id);
@@ -49,7 +63,7 @@ export class TransportLocal extends Transport<ITransportSettings> {
             return;
         }
 
-        if (this.isRequestExpired(request)) {
+        if (this.isCommandRequestExpired(request)) {
             this.logCommand(command, TransportLogType.RESPONSE_EXPIRED);
             this.warn(`Unable to completed "${command.name}" command: timeout is expired`);
             return;
@@ -57,20 +71,6 @@ export class TransportLocal extends Transport<ITransportSettings> {
 
         command.response(result);
         this.responseSend(command);
-    }
-
-    public wait<U>(command: ITransportCommand<U>): void {
-        let request = this.requests.get(command.id);
-        if (_.isNil(request)) {
-            throw new ExtendedError(`Unable to wait "${command.name}" command: can't find request details`);
-        }
-
-        if (this.isRequestWaitExpired(request)) {
-            this.complete(command, new TransportWaitExceedError(command));
-            return;
-        }
-
-        this.waitSend(command, request);
     }
 
     public dispatch<T>(event: ITransportEvent<T>): void {
@@ -89,15 +89,15 @@ export class TransportLocal extends Transport<ITransportSettings> {
     //
     // --------------------------------------------------------------------------
 
-    protected checkRequestStorage<U>(command: ITransportCommand<U>, options: ITransportCommandOptions, isNeedReply: boolean): ITransportRequestStorage {
+    protected checkRequestStorage<U>(command: ITransportCommand<U>, options: ITransportCommandOptions, isNeedReply: boolean): ITransportCommandRequest {
         let item = this.requests.get(command.id);
 
         if (!_.isNil(item)) {
             item.waitCount++;
         } else {
             item = {
-                waitCount: 0,
                 expiredDate: isNeedReply ? DateUtil.getDate(Date.now() + this.getCommandTimeoutDelay(command, options)) : null,
+                waitCount: 0,
                 isNeedReply
             };
             item = ObjectUtil.copyProperties(options, item);
@@ -136,7 +136,7 @@ export class TransportLocal extends Transport<ITransportSettings> {
         this.logCommand(command, TransportLogType.REQUEST_RECEIVED);
         let request = this.checkRequestStorage(command, options, isNeedReply);
 
-        if (this.isRequestExpired(request)) {
+        if (this.isCommandRequestExpired(request)) {
             this.logCommand(command, TransportLogType.REQUEST_EXPIRED);
             this.warn(`Received "${command.name}" command with already expired timeout: ignore`);
             this.requests.delete(command.id);
@@ -148,7 +148,7 @@ export class TransportLocal extends Transport<ITransportSettings> {
     protected responseSend<U, V>(command: ITransportCommandAsync<U, V>): void {
         this.logCommand(command, TransportLogType.RESPONSE_SENDED);
 
-        // Immediately receive the same commad
+        // Immediately receive the same command
         this.responseReceived(command);
     }
 
@@ -157,7 +157,7 @@ export class TransportLocal extends Transport<ITransportSettings> {
         this.commandProcessed(command);
     }
 
-    protected async waitSend<U>(command: ITransportCommand<U>, request: ITransportRequestStorage): Promise<void> {
+    protected async waitSend<U>(command: ITransportCommand<U>, request: ITransportCommandRequest): Promise<void> {
         this.logCommand(command, TransportLogType.RESPONSE_WAIT);
         await PromiseHandler.delay(request.waitDelay);
         this.requestReceived(command, request, request.isNeedReply);

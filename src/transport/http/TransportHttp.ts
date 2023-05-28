@@ -1,11 +1,9 @@
-import axios, { AxiosError } from 'axios';
+import axios from 'axios';
 import * as _ from 'lodash';
 import { Observable } from 'rxjs';
 import { LoadableEvent } from '../../Loadable';
 import { ExtendedError } from '../../error/ExtendedError';
-import { ILogger } from '../../logger/ILogger';
 import { ObservableData } from '../../observer/ObservableData';
-import { PromiseHandler } from '../../promise/PromiseHandler';
 import { Transport } from '../../transport/Transport';
 import { ITransportCommand, ITransportCommandAsync, ITransportCommandOptions, ITransportEvent } from '../../transport/ITransport';
 import { ITransportHttpRequest } from './ITransportHttpRequest';
@@ -14,7 +12,7 @@ import { TransportHttpCommandAsync } from './TransportHttpCommandAsync';
 import { isAxiosError, parseAxiosError } from '../../error/Axios';
 import { TransportLogType } from '../TransportLogUtil';
 
-export class TransportHttp<T extends ITransportHttpSettings = ITransportHttpSettings> extends Transport<T> {
+export class TransportHttp<S extends ITransportHttpSettings = ITransportHttpSettings, O extends ITransportCommandOptions = ITransportCommandOptions> extends Transport<S, O> {
     // --------------------------------------------------------------------------
     //
     // 	Static Methods
@@ -27,35 +25,23 @@ export class TransportHttp<T extends ITransportHttpSettings = ITransportHttpSett
 
     // --------------------------------------------------------------------------
     //
-    //  Constructor
-    //
-    // --------------------------------------------------------------------------
-
-    constructor(logger: ILogger, settings: T, context?: string) {
-        super(logger, settings, context);
-    }
-
-    // --------------------------------------------------------------------------
-    //
     //  Public Methods
     //
     // --------------------------------------------------------------------------
 
-    public send<U>(command: ITransportCommand<U>, options?: ITransportCommandOptions): void {
+    public send<U>(command: ITransportCommand<U>, options?: O): void {
         this.requestSend(command, this.getCommandOptions(command, options));
     }
 
-    public sendListen<U, V>(command: ITransportCommandAsync<U, V>, options?: ITransportCommandOptions): Promise<V> {
-        if (this.promises.has(command.id)) {
-            return this.promises.get(command.id).handler.promise;
+    public sendListen<U, V>(command: ITransportCommandAsync<U, V>, options?: O): Promise<V> {
+        let promise = this.promises.get(command.id);
+        if (!_.isNil(promise)) {
+            return promise.handler.promise;
         }
-
         options = this.getCommandOptions(command, options);
-
-        let handler = PromiseHandler.create<V, ExtendedError>();
-        this.promises.set(command.id, { command, handler, options });
+        promise = this.addCommandPromise(command, options);
         this.requestSend(command, options);
-        return handler.promise;
+        return promise.handler.promise;
     }
 
     public complete<U, V>(command: ITransportCommand<U>, result?: V | Error): void {
@@ -65,7 +51,7 @@ export class TransportHttp<T extends ITransportHttpSettings = ITransportHttpSett
         this.responseSend(command);
     }
 
-    public call<V = any, U = any>(path: string, request?: ITransportHttpRequest<U>, options?: ITransportCommandOptions): Promise<V> {
+    public call<V = any, U = any>(path: string, request?: ITransportHttpRequest<U>, options?: O): Promise<V> {
         return this.sendListen(new TransportHttpCommandAsync(path, request), options);
     }
 
@@ -105,26 +91,13 @@ export class TransportHttp<T extends ITransportHttpSettings = ITransportHttpSett
         return new ExtendedError(`Unknown error`, ExtendedError.DEFAULT_ERROR_CODE, data);
     }
 
-    /*
-    protected parseAxiosError<U>(item: AxiosError, command: ITransportCommand<U>): ExtendedError {
-        let message = !_.isNil(item.message) ? item.message.toLocaleLowerCase() : ``;
-        if (message.includes(`network error`)) {
-            return new TransportNoConnectionError(command);
-        }
-        if (message.includes(`timeout of`)) {
-            return new TransportTimeoutError(command);
-        }
-        return parseAxiosError(item);
-    }
-    */
-
     // --------------------------------------------------------------------------
     //
     //  Protected Methods
     //
     // --------------------------------------------------------------------------
 
-    protected async requestSend<U>(command: ITransportCommand<U>, options: ITransportCommandOptions): Promise<void> {
+    protected async requestSend<U>(command: ITransportCommand<U>, options: O): Promise<void> {
         this.prepareCommand(command, options);
 
         this.logCommand(command, this.isCommandAsync(command) ? TransportLogType.REQUEST_SENDED : TransportLogType.REQUEST_NO_REPLY);
@@ -132,7 +105,8 @@ export class TransportHttp<T extends ITransportHttpSettings = ITransportHttpSett
         let result = null;
 
         try {
-            result = (await axios.create(this.settings).request(command.request)).data;
+            let { data } = await axios.create(this.settings).request(command.request);
+            result = data;
         } catch (error) {
             result = error;
         }
@@ -154,7 +128,7 @@ export class TransportHttp<T extends ITransportHttpSettings = ITransportHttpSett
         this.commandProcessed(command);
     }
 
-    protected prepareCommand<U>(command: ITransportCommand<U>, options: ITransportCommandOptions): void {
+    protected prepareCommand<U>(command: ITransportCommand<U>, options: O): void {
         if (_.isNil(this.settings)) {
             throw new ExtendedError(`Settings is undefined`);
         }
@@ -163,7 +137,7 @@ export class TransportHttp<T extends ITransportHttpSettings = ITransportHttpSett
         }
 
         let request = command.request as ITransportHttpRequest;
-        request.timeout = options.timeout;
+        request.timeout = options.defaultTimeout;
 
         if (_.isNil(request.url)) {
             request.url = command.name;
