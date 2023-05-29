@@ -44,9 +44,9 @@ export class TransportHttp<S extends ITransportHttpSettings = ITransportHttpSett
         return promise.handler.promise;
     }
 
-    public complete<U, V>(command: ITransportCommand<U>, result?: V | Error): void {
+    public complete<U, V>(command: ITransportCommand<U>, response?: V | Error): void {
         if (this.isCommandAsync(command)) {
-            command.response(result);
+            command.response(response);
         }
         this.responseSend(command);
     }

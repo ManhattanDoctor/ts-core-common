@@ -136,7 +136,7 @@ export abstract class Transport<S extends ITransportSettings = ITransportSetting
 
     public abstract wait<U>(command: ITransportCommand<U>): void;
 
-    public abstract complete<U, V>(command: ITransportCommand<U>, result?: V | Error): void;
+    public abstract complete<U, V>(command: ITransportCommand<U>, response?: V | Error): void;
 
     public abstract dispatch<T>(event: ITransportEvent<T>): void;
 
@@ -293,7 +293,7 @@ export abstract class Transport<S extends ITransportSettings = ITransportSetting
         this.logVerboseData(event.data, type);
     }
 
-    protected logCommand<U>(command: ITransportCommand<U>, type: TransportLogType): void {
+    protected logCommand<U, V>(command: ITransportCommand<U>, type: TransportLogType): void {
         if (!_.isEmpty(this.logCommandFilters) && !this.logCommandFilters.every(filter => filter(command, type))) {
             return;
         }

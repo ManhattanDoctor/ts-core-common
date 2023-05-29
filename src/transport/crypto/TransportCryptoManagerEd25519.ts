@@ -32,10 +32,6 @@ export class TransportCryptoManagerEd25519 extends TransportCryptoManager {
     //
     // --------------------------------------------------------------------------
 
-    protected toStringRequest<U>(item: U): string {
-        return item.toString();
-    }
-
     public get algorithm(): string {
         return TransportCryptoManagerEd25519.ALGORITHM;
     }

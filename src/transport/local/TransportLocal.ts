@@ -49,7 +49,7 @@ export class TransportLocal extends Transport<ITransportSettings> {
         this.waitSend(command, request);
     }
 
-    public complete<U, V>(command: ITransportCommand<U>, result?: V | Error): void {
+    public complete<U, V>(command: ITransportCommand<U>, response?: V | Error): void {
         let request = this.requests.get(command.id);
         this.requests.delete(command.id);
 
@@ -69,7 +69,7 @@ export class TransportLocal extends Transport<ITransportSettings> {
             return;
         }
 
-        command.response(result);
+        command.response(response);
         this.responseSend(command);
     }
 

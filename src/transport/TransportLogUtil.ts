@@ -28,6 +28,8 @@ export class TransportLogUtil {
                 return '⇢';
             case TransportLogType.RESPONSE_NO_REPLY:
                 return '✔';
+            case TransportLogType.RESPONSE_NO_REPLY_ERROR:
+                return '✘';
             case TransportLogType.RESPONSE_EXPIRED:
                 return '↛';
             case TransportLogType.RESPONSE_WAIT:
@@ -49,10 +51,10 @@ export class TransportLogUtil {
         return `${TransportLogUtil.getLogMark(type)} ${event.name}`;
     }
 
-    public static commandToString<U>(command: ITransportCommand<U>, type: TransportLogType): string {
+    public static commandToString<U, V>(command: ITransportCommand<U>, type: TransportLogType): string {
         let suffix = '•';
         if (Transport.isCommandAsync(command) && (!_.isNil(command.error) || !_.isNil(command.data))) {
-            suffix = !Transport.isCommandHasError(command) ? '✔' : '✘';
+            suffix = Transport.isCommandHasError(command) ? '✘' : '✔';
         }
         return `${TransportLogUtil.getLogMark(type)} ${command.name} ${suffix} (${command.id})`;
     }
@@ -72,6 +74,7 @@ export enum TransportLogType {
     RESPONSE_SENDED = 'RESPONSE_SENDED',
     RESPONSE_NO_REPLY = 'RESPONSE_NO_REPLY',
     RESPONSE_EXPIRED = 'RESPONSE_EXPIRED',
+    RESPONSE_NO_REPLY_ERROR = 'REQUEST_NO_REPLY_ERROR',
 
     RESPONSE_WAIT = 'RESPONSE_WAIT',
     RESPONSE_TIMEOUT = 'RESPONSE_TIMEOUT',

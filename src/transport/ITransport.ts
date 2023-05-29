@@ -13,7 +13,7 @@ export interface ITransportSender {
 export interface ITransportReceiver {
     wait<U>(command: ITransportCommand<U>): void;
     listen<U>(name: string): Observable<U>;
-    complete<U, V>(command: ITransportCommand<U>, result?: V | ExtendedError): void;
+    complete<U, V>(command: ITransportCommand<U>, response?: V | ExtendedError): void;
     dispatch<T>(event: ITransportEvent<T>): void;
 }
 

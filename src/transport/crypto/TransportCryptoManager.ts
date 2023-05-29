@@ -1,5 +1,4 @@
 import { IKeyAsymmetric, ISignature } from "../../crypto";
-import { ObjectUtil, TransformUtil } from "../../util";
 import { ITransportCommand } from "../ITransport";
 import { ITransportCryptoManager } from "./ITransportCryptoManager";
 import * as _ from 'lodash';
@@ -51,6 +50,7 @@ export abstract class TransportCryptoManager implements ITransportCryptoManager 
     }
 
     protected toStringRequest<U>(item: U): string {
-        return _.isObject(item) ? TransformUtil.fromJSON(ObjectUtil.sortKeys(item, true)) : item.toString();
+        return item.toString();
+        // return _.isObject(item) ? TransformUtil.fromJSON(ObjectUtil.sortKeys(item, true)) : item.toString();
     }
 }
