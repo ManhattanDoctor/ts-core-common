@@ -33,29 +33,29 @@ export abstract class Transport<S extends ITransportSettings = ITransportSetting
         if (_.isNil(item)) {
             return;
         }
+        if (_.isNil(item.timeout)) {
+            item.timeout = Transport.DEFAULT_TIMEOUT;
+        }
         if (_.isNil(item.waitDelay)) {
             item.waitDelay = Transport.DEFAULT_WAIT_DELAY;
         }
-        if (_.isNil(item.waitMaxCount)) {
-            item.waitMaxCount = Transport.DEFAULT_WAIT_MAX_COUNT;
-        }
-        if (_.isNil(item.defaultTimeout)) {
-            item.defaultTimeout = Transport.DEFAULT_TIMEOUT;
+        if (_.isNil(item.waitMax)) {
+            item.waitMax = Transport.DEFAULT_WAIT_MAX_COUNT;
         }
     }
-    
+
     public static clearDefaultOptions(item: ITransportCommandOptions): void {
         if (_.isNil(item)) {
             return;
         }
-        if (item.defaultTimeout === Transport.DEFAULT_TIMEOUT) {
-            delete item.defaultTimeout;
+        if (item.timeout === Transport.DEFAULT_TIMEOUT) {
+            delete item.timeout;
         }
         if (item.waitDelay === Transport.DEFAULT_WAIT_DELAY) {
             delete item.waitDelay;
         }
-        if (item.waitMaxCount === Transport.DEFAULT_WAIT_MAX_COUNT) {
-            delete item.waitMaxCount;
+        if (item.waitMax === Transport.DEFAULT_WAIT_MAX_COUNT) {
+            delete item.waitMax;
         }
     }
 
@@ -239,8 +239,8 @@ export abstract class Transport<S extends ITransportSettings = ITransportSetting
         if (_.isNil(options)) {
             options = {} as O;
         }
-        if (_.isNil(options.defaultTimeout)) {
-            options.defaultTimeout = this.getSettingsValue('defaultTimeout', Transport.DEFAULT_TIMEOUT);
+        if (_.isNil(options.timeout)) {
+            options.timeout = this.getSettingsValue('timeout', Transport.DEFAULT_TIMEOUT);
         }
         return options;
     }
@@ -258,18 +258,18 @@ export abstract class Transport<S extends ITransportSettings = ITransportSetting
     // --------------------------------------------------------------------------
 
     protected getCommandTimeoutDelay<U>(command: ITransportCommand<U>, options: O): number {
-        return !_.isNil(options) && _.isNil(options.defaultTimeout) ? options.defaultTimeout : Transport.DEFAULT_TIMEOUT;
+        return !_.isNil(options) && _.isNil(options.timeout) ? options.timeout : Transport.DEFAULT_TIMEOUT;
     }
 
     protected isCommandRequestExpired(request: R): boolean {
-        return !_.isNil(request.expiredDate) ? Date.now() > request.expiredDate.getTime() : false;
+        return !_.isNil(request.expired) ? Date.now() > request.expired.getTime() : false;
     }
 
     protected isCommandRequestWaitExpired(request: R): boolean {
-        if (!_.isNil(request.waitMaxCount) && request.waitCount >= request.waitMaxCount) {
+        if (!_.isNil(request.waitMax) && request.waited >= request.waitMax) {
             return true;
         }
-        if (request.waitCount * request.waitDelay >= request.defaultTimeout) {
+        if (request.waited * request.waitDelay >= request.timeout) {
             return true;
         }
         return false;
@@ -373,7 +373,7 @@ export interface ITransportCommandPromise<U = any, V = any, O extends ITransport
 }
 
 export interface ITransportCommandRequest extends ITransportCommandOptions {
-    waitCount: number;
-    expiredDate: Date;
+    waited: number;
+    expired: Date;
     isNeedReply: boolean;
 }

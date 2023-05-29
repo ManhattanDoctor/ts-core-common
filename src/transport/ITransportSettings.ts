@@ -1,7 +1,7 @@
 import { TransportCommandWaitDelay } from './ITransport';
 
 export interface ITransportSettings {
-    defaultTimeout?: number;
+    timeout?: number;
     defaultWaitDelay?: TransportCommandWaitDelay;
     defaultWaitMaxCount?: number;
 }

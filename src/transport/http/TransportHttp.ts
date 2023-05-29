@@ -137,7 +137,7 @@ export class TransportHttp<S extends ITransportHttpSettings = ITransportHttpSett
         }
 
         let request = command.request as ITransportHttpRequest;
-        request.timeout = options.defaultTimeout;
+        request.timeout = options.timeout;
 
         if (_.isNil(request.url)) {
             request.url = command.name;

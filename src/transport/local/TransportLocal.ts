@@ -91,18 +91,15 @@ export class TransportLocal extends Transport<ITransportSettings> {
 
     protected checkRequestStorage<U>(command: ITransportCommand<U>, options: ITransportCommandOptions, isNeedReply: boolean): ITransportCommandRequest {
         let item = this.requests.get(command.id);
-
         if (!_.isNil(item)) {
-            item.waitCount++;
-        } else {
-            item = {
-                expiredDate: isNeedReply ? DateUtil.getDate(Date.now() + this.getCommandTimeoutDelay(command, options)) : null,
-                waitCount: 0,
-                isNeedReply
-            };
-            item = ObjectUtil.copyProperties(options, item);
-            this.requests.set(command.id, item);
+            item.waited++;
+            return item;
         }
+        item = ObjectUtil.copyProperties(options, { waitCount: 0, isNeedReply });
+        if (isNeedReply) {
+            item.expired = DateUtil.getDate(Date.now() + this.getCommandTimeoutDelay(command, options));
+        }
+        this.requests.set(command.id, item);
         return item;
     }
 
