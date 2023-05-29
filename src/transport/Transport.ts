@@ -308,6 +308,7 @@ export abstract class Transport<S extends ITransportSettings = ITransportSetting
             case TransportLogType.RESPONSE_SENDED:
             case TransportLogType.RESPONSE_RECEIVED:
             case TransportLogType.RESPONSE_NO_REPLY:
+            case TransportLogType.RESPONSE_NO_REPLY_ERROR:
                 this.logResponse(command, type);
                 break;
         }
@@ -374,6 +375,6 @@ export interface ITransportCommandPromise<U = any, V = any, O extends ITransport
 
 export interface ITransportCommandRequest extends ITransportCommandOptions {
     waited: number;
-    expired: Date;
+    expired?: Date;
     isNeedReply: boolean;
 }

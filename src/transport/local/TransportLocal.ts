@@ -95,7 +95,8 @@ export class TransportLocal extends Transport<ITransportSettings> {
             item.waited++;
             return item;
         }
-        item = ObjectUtil.copyProperties(options, { waitCount: 0, isNeedReply });
+        item = { waited: 0, isNeedReply };
+        item = ObjectUtil.copyProperties(options, item);
         if (isNeedReply) {
             item.expired = DateUtil.getDate(Date.now() + this.getCommandTimeoutDelay(command, options));
         }
