@@ -2,7 +2,7 @@ import { Observable } from 'rxjs';
 import { ExtendedError } from '../error';
 import { ITraceable } from '../trace';
 
-export interface ITransport extends ITransportSender, ITransportReceiver {}
+export interface ITransport extends ITransportSender, ITransportReceiver { }
 
 export interface ITransportSender {
     send<U>(command: ITransportCommand<U>, options?: ITransportCommandOptions): void;
@@ -13,8 +13,8 @@ export interface ITransportSender {
 export interface ITransportReceiver {
     wait<U>(command: ITransportCommand<U>): void;
     listen<U>(name: string): Observable<U>;
-    complete<U, V>(command: ITransportCommand<U>, result?: V | ExtendedError): void;
-    dispatch<T>(event: ITransportEvent<T>): void;
+    complete<U, V>(command: ITransportCommand<U>, response?: V | ExtendedError): void;
+    dispatch<T>(event: ITransportEvent<T>, ...params): void;
 }
 
 export interface ITransportCommand<U> {
@@ -31,8 +31,8 @@ export interface ITransportCommandAsync<U, V> extends ITransportCommand<U> {
 
 export interface ITransportCommandOptions {
     timeout?: number;
+    waitMax?: number;
     waitDelay?: TransportCommandWaitDelay;
-    waitMaxCount?: number;
 }
 
 export enum TransportCommandWaitDelay {

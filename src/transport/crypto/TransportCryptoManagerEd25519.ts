@@ -1,9 +1,9 @@
 import { ITransportCommand } from '../ITransport';
 import { Ed25519, ISignature } from '../../crypto';
+import { TransportCryptoManager } from './TransportCryptoManager';
 import * as _ from 'lodash';
-import { ITransportCryptoManager } from './ITransportCryptoManager';
 
-export class TransportCryptoManagerEd25519 implements ITransportCryptoManager {
+export class TransportCryptoManagerEd25519 extends TransportCryptoManager {
     // --------------------------------------------------------------------------
     //
     //  Static Methods
@@ -31,11 +31,6 @@ export class TransportCryptoManagerEd25519 implements ITransportCryptoManager {
     //  Protected Methods
     //
     // --------------------------------------------------------------------------
-
-    protected toString<U>(command: ITransportCommand<U>, nonce: string): string {
-        let request = !_.isNil(command.request) ? command.request.toString() : '';
-        return `${command.name}${request}${nonce}`;
-    }
 
     public get algorithm(): string {
         return TransportCryptoManagerEd25519.ALGORITHM;

@@ -4,7 +4,7 @@ import { TransportWaitError } from './error/TransportWaitError';
 import { ITransport, ITransportCommand } from './ITransport';
 import * as _ from 'lodash';
 
-export abstract class AbstractTransportCommandHandler<U, T extends ITransportCommand<U>> extends LoggerWrapper {
+export abstract class TransportCommandHandlerAbstract<U, T extends ITransportCommand<U>> extends LoggerWrapper {
     // --------------------------------------------------------------------------
     //
     //  Constructor
@@ -26,7 +26,7 @@ export abstract class AbstractTransportCommandHandler<U, T extends ITransportCom
     }
 
     protected handleError(command: T, error: Error): void {
-        if (error instanceof TransportWaitError) {
+        if (TransportWaitError.instanceOf(error)) {
             this.transport.wait(command);
             return;
         }
@@ -37,6 +37,6 @@ export abstract class AbstractTransportCommandHandler<U, T extends ITransportCom
             error = new ExtendedError(error);
         }
         this.transport.complete(command, error);
-        this.error(error, ExtendedError.instanceOf(error) && !error.isFatal ? '' : error.stack);
+        this.error(error, error.stack);
     }
 }

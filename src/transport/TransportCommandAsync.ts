@@ -42,13 +42,7 @@ export class TransportCommandAsync<U, V> extends TransportCommand<U> implements 
     // --------------------------------------------------------------------------
 
     protected validateResponse(value: V | ExtendedError | Error): V {
-        if (value instanceof ExtendedError) {
-            throw value;
-        }
-        if (ExtendedError.instanceOf(value)) {
-            throw ExtendedError.create(value);
-        }
-        if (value instanceof Error) {
+        if (ExtendedError.instanceOf(value) || value instanceof Error) {
             throw ExtendedError.create(value);
         }
         value = this.checkResponse(value);

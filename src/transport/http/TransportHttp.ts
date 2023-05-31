@@ -1,44 +1,26 @@
-import axios, { AxiosError } from 'axios';
+import axios from 'axios';
 import * as _ from 'lodash';
 import { Observable } from 'rxjs';
 import { LoadableEvent } from '../../Loadable';
 import { ExtendedError } from '../../error/ExtendedError';
-import { ILogger } from '../../logger/ILogger';
 import { ObservableData } from '../../observer/ObservableData';
-import { PromiseHandler } from '../../promise/PromiseHandler';
-import { Transport, TransportLogType } from '../../transport/Transport';
+import { Transport } from '../../transport/Transport';
 import { ITransportCommand, ITransportCommandAsync, ITransportCommandOptions, ITransportEvent } from '../../transport/ITransport';
-import { TransportNoConnectionError, TransportTimeoutError } from '../error';
 import { ITransportHttpRequest } from './ITransportHttpRequest';
 import { ITransportHttpSettings } from './ITransportHttpSettings';
 import { TransportHttpCommandAsync } from './TransportHttpCommandAsync';
+import { isAxiosError, parseAxiosError } from '../../error/Axios';
+import { TransportLogType } from '../TransportLogUtil';
 
-export class TransportHttp<T extends ITransportHttpSettings = ITransportHttpSettings> extends Transport<T> {
+export class TransportHttp<S extends ITransportHttpSettings = ITransportHttpSettings, O extends ITransportCommandOptions = ITransportCommandOptions> extends Transport<S, O> {
     // --------------------------------------------------------------------------
     //
     // 	Static Methods
     //
     // --------------------------------------------------------------------------
 
-    public static isError(data: any): boolean {
-        return data instanceof ExtendedError || ExtendedError.instanceOf(data) || TransportHttp.isAxiosError(data);
-    }
-
-    public static isAxiosError(data: any): boolean {
-        if (!_.isNil(data)) {
-            return _.isBoolean(data.isAxiosError) ? data.isAxiosError : false;
-        }
-        return false;
-    }
-
-    // --------------------------------------------------------------------------
-    //
-    //  Constructor
-    //
-    // --------------------------------------------------------------------------
-
-    constructor(logger: ILogger, settings: T, context?: string) {
-        super(logger, settings, context);
+    public static isError(item: any): boolean {
+        return ExtendedError.instanceOf(item) || isAxiosError(item);
     }
 
     // --------------------------------------------------------------------------
@@ -47,31 +29,29 @@ export class TransportHttp<T extends ITransportHttpSettings = ITransportHttpSett
     //
     // --------------------------------------------------------------------------
 
-    public send<U>(command: ITransportCommand<U>, options?: ITransportCommandOptions): void {
+    public send<U>(command: ITransportCommand<U>, options?: O): void {
         this.requestSend(command, this.getCommandOptions(command, options));
     }
 
-    public sendListen<U, V>(command: ITransportCommandAsync<U, V>, options?: ITransportCommandOptions): Promise<V> {
-        if (this.promises.has(command.id)) {
-            return this.promises.get(command.id).handler.promise;
+    public sendListen<U, V>(command: ITransportCommandAsync<U, V>, options?: O): Promise<V> {
+        let promise = this.promises.get(command.id);
+        if (!_.isNil(promise)) {
+            return promise.handler.promise;
         }
-
         options = this.getCommandOptions(command, options);
-
-        let handler = PromiseHandler.create<V, ExtendedError>();
-        this.promises.set(command.id, { command, handler, options });
+        promise = this.addCommandPromise(command, options);
         this.requestSend(command, options);
-        return handler.promise;
+        return promise.handler.promise;
     }
 
-    public complete<U, V>(command: ITransportCommand<U>, result?: V | Error): void {
+    public complete<U, V>(command: ITransportCommand<U>, response?: V | Error): void {
         if (this.isCommandAsync(command)) {
-            command.response(result);
+            command.response(response);
         }
         this.responseSend(command);
     }
 
-    public call<V = any, U = any>(path: string, request?: ITransportHttpRequest<U>, options?: ITransportCommandOptions): Promise<V> {
+    public call<V = any, U = any>(path: string, request?: ITransportHttpRequest<U>, options?: O): Promise<V> {
         return this.sendListen(new TransportHttpCommandAsync(path, request), options);
     }
 
@@ -102,41 +82,13 @@ export class TransportHttp<T extends ITransportHttpSettings = ITransportHttpSett
     }
 
     protected parseError<U>(data: any, command: ITransportCommand<U>): ExtendedError {
-        if (data instanceof ExtendedError) {
-            return data;
+        if (isAxiosError(data)) {
+            return parseAxiosError(data);
         }
-        if (ExtendedError.instanceOf(data)) {
+        if (ExtendedError.instanceOf(data) || data instanceof Error) {
             return ExtendedError.create(data);
         }
-        if (TransportHttp.isAxiosError(data)) {
-            return this.parseAxiosError(data, command);
-        }
         return new ExtendedError(`Unknown error`, ExtendedError.DEFAULT_ERROR_CODE, data);
-    }
-
-    protected parseAxiosError<U>(data: AxiosError, command: ITransportCommand<U>): ExtendedError {
-        let message = !_.isNil(data.message) ? data.message.toLocaleLowerCase() : ``;
-        if (message.includes(`network error`)) {
-            return new TransportNoConnectionError(command);
-        }
-        if (message.includes(`timeout of`)) {
-            return new TransportTimeoutError(command);
-        }
-
-        if (_.isNil(data.response)) {
-            return new ExtendedError(`Unknown axios error`, ExtendedError.DEFAULT_ERROR_CODE, data);
-        }
-
-        let response = data.response;
-        if (ExtendedError.instanceOf(response.data)) {
-            return ExtendedError.create(response.data);
-        }
-
-        message = response.statusText;
-        if (_.isEmpty(message) && !_.isNil(response.data) && !_.isNil(response.data.error)) {
-            message = response.data.error;
-        }
-        return new ExtendedError(message, response.status, response.data);
     }
 
     // --------------------------------------------------------------------------
@@ -145,7 +97,7 @@ export class TransportHttp<T extends ITransportHttpSettings = ITransportHttpSett
     //
     // --------------------------------------------------------------------------
 
-    protected async requestSend<U>(command: ITransportCommand<U>, options: ITransportCommandOptions): Promise<void> {
+    protected async requestSend<U>(command: ITransportCommand<U>, options: O): Promise<void> {
         this.prepareCommand(command, options);
 
         this.logCommand(command, this.isCommandAsync(command) ? TransportLogType.REQUEST_SENDED : TransportLogType.REQUEST_NO_REPLY);
@@ -153,7 +105,8 @@ export class TransportHttp<T extends ITransportHttpSettings = ITransportHttpSett
         let result = null;
 
         try {
-            result = (await axios.create(this.settings).request(command.request)).data;
+            let { data } = await axios.create(this.settings).request(command.request);
+            result = data;
         } catch (error) {
             result = error;
         }
@@ -166,7 +119,7 @@ export class TransportHttp<T extends ITransportHttpSettings = ITransportHttpSett
             this.observer.next(new ObservableData(LoadableEvent.FINISHED, command));
             return;
         }
-        // Immediately receive the commad
+        // Immediately receive the command
         this.responseReceived(command);
     }
 
@@ -175,7 +128,7 @@ export class TransportHttp<T extends ITransportHttpSettings = ITransportHttpSett
         this.commandProcessed(command);
     }
 
-    protected prepareCommand<U>(command: ITransportCommand<U>, options: ITransportCommandOptions): void {
+    protected prepareCommand<U>(command: ITransportCommand<U>, options: O): void {
         if (_.isNil(this.settings)) {
             throw new ExtendedError(`Settings is undefined`);
         }
@@ -225,5 +178,5 @@ export class TransportHttp<T extends ITransportHttpSettings = ITransportHttpSett
     }
 }
 
-export interface ITransportHttpCommand<T> extends ITransportCommand<ITransportHttpRequest<T>> {}
-export interface ITransportHttpCommandAsync<U, V> extends ITransportCommandAsync<ITransportHttpRequest<U>, V> {}
+export interface ITransportHttpCommand<T> extends ITransportCommand<ITransportHttpRequest<T>> { }
+export interface ITransportHttpCommandAsync<U, V> extends ITransportCommandAsync<ITransportHttpRequest<U>, V> { }

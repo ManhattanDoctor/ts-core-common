@@ -1,8 +1,8 @@
 import { ILogger } from '../logger';
-import { AbstractTransportCommandHandler } from './AbstractTransportCommandHandler';
+import { TransportCommandHandlerAbstract } from './TransportCommandHandlerAbstract';
 import { ITransport, ITransportCommand } from './ITransport';
 
-export abstract class TransportCommandHandler<U, T extends ITransportCommand<U>, V = void> extends AbstractTransportCommandHandler<U, T> {
+export abstract class TransportCommandHandler<U, T extends ITransportCommand<U>, V = void> extends TransportCommandHandlerAbstract<U, T> {
     // --------------------------------------------------------------------------
     //
     //  Constructor

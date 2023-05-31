@@ -1,8 +1,9 @@
 import * as _ from 'lodash';
 import { Filterable } from './Filterable';
+import { IFilterable } from './IFilterable';
 import { IPaginable } from './IPaginable';
 
-export class Paginable<U, V = any> extends Filterable<U> implements IPaginable<U, V> {
+export class Paginable<U, V = any> extends Filterable<U, V> implements IPaginable<U, V> {
     // --------------------------------------------------------------------------
     //
     //  Constants
@@ -18,13 +19,16 @@ export class Paginable<U, V = any> extends Filterable<U> implements IPaginable<U
     //
     // --------------------------------------------------------------------------
 
-    public static transform<U, V,>(item: IPaginable<U, V>): Paginable<U, V> {
+    public static override transform<T extends IFilterable<U, V>, U, V>(item: T): T {
         if (_.isNil(item)) {
             return item;
         }
-        item = Filterable.transform(item) as IPaginable<U, V>;
-        item.pageSize = !_.isNil(item.pageSize) ? parseInt(item.pageSize.toString(), 10) : Paginable.DEFAULT_PAGE_SIZE;
-        item.pageIndex = !_.isNil(item.pageIndex) ? parseInt(item.pageIndex.toString(), 10) : Paginable.DEFAULT_PAGE_INDEX;
+        item = Filterable.transform(item);
+
+        let pageSize = item['pageSize'];
+        let pageIndex = item['pageIndex'];
+        item['pageSize'] = !_.isNil(pageSize) ? parseInt(pageSize.toString(), 10) : Paginable.DEFAULT_PAGE_SIZE;
+        item['pageIndex'] = !_.isNil(pageIndex) ? parseInt(pageIndex.toString(), 10) : Paginable.DEFAULT_PAGE_INDEX;
         return item;
     }
 
@@ -34,6 +38,6 @@ export class Paginable<U, V = any> extends Filterable<U> implements IPaginable<U
     //
     // --------------------------------------------------------------------------
 
-    pageSize: number;
-    pageIndex: number;
+    public pageSize: number;
+    public pageIndex: number;
 }

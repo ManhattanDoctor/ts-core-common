@@ -1,14 +1,14 @@
 import { ExtendedError } from '../../error';
 import { ITransportCommand } from '../ITransport';
 
-export class TransportNoConnectionError<U> extends ExtendedError<ITransportCommand<U>> {
+export class TransportNoConnectionError<U> extends ExtendedError<ITransportCommand<U>, string> {
     // --------------------------------------------------------------------------
     //
     //  Constants
     //
     // --------------------------------------------------------------------------
 
-    public static ERROR_CODE = 5002;
+    public static ERROR_CODE = 'TRANSPORT_NO_CONNECTION_ERROR';
 
     // --------------------------------------------------------------------------
     //

@@ -1,6 +1,6 @@
-import { Exclude, Transform } from 'class-transformer';
-import * as _ from 'lodash';
+import { Exclude } from 'class-transformer';
 import { ObjectUtil, TransformUtil } from '../util';
+import * as _ from 'lodash';
 
 export class ExtendedError<U = any, V = number> extends Error implements Error {
     // --------------------------------------------------------------------------
@@ -10,7 +10,7 @@ export class ExtendedError<U = any, V = number> extends Error implements Error {
     // --------------------------------------------------------------------------
 
     public static DEFAULT_ERROR_CODE = -1000;
-    public static DEFAULT_ERROR_MESSAGE = 'Default extended error';
+    public static DEFAULT_ERROR_MESSAGE = 'Unknown extended error';
 
     public static HTTP_CODE_BAD_REQUEST = 400;
     public static HTTP_CODE_UNAUTHORIZED = 401;
@@ -51,36 +51,29 @@ export class ExtendedError<U = any, V = number> extends Error implements Error {
         if (item instanceof ExtendedError) {
             return item;
         }
-
+        if (ExtendedError.instanceOf(item)) {
+            return TransformUtil.toClass(ExtendedError, item);
+        }
         if (_.isNil(code)) {
             code = ExtendedError.DEFAULT_ERROR_CODE;
         }
-        let details = null;
-        let message = null;
         if (item instanceof Error) {
-            details = item.stack;
-            message = item.message;
+            let message = item.message;
             if (!_.isEmpty(item.name)) {
                 message = `[${item.name}] ${message}`;
             }
-            return new ExtendedError(message, code, details);
+            return new ExtendedError(message, code, item.stack);
         }
 
-        message = ExtendedError.DEFAULT_ERROR_MESSAGE;
+        let message = !_.isNil(item.message) ? item.message : ExtendedError.DEFAULT_ERROR_MESSAGE;
         if (!_.isNil(item.code)) {
             code = item.code;
         }
-        if (!_.isNil(item.message)) {
-            message = item.message;
-        }
-        if (!_.isNil(item.details)) {
-            details = item.details;
-        }
-        return new ExtendedError(message, code, details);
+        return new ExtendedError(message, code, item.details);
     }
 
-    public static instanceOf(data: any): data is ExtendedError {
-        return ObjectUtil.instanceOf<ExtendedError>(data, ['code', 'message', 'details']);
+    public static instanceOf(item: any): boolean {
+        return item instanceof ExtendedError || item.isExtendedError || ObjectUtil.instanceOf<ExtendedError>(item, ['code', 'message', 'details']);
     }
 
     // --------------------------------------------------------------------------
@@ -91,14 +84,12 @@ export class ExtendedError<U = any, V = number> extends Error implements Error {
 
     public code: V;
     public message: string;
-    public isFatal: boolean;
+    public isExtendedError: boolean;
+
+    public details?: U;
 
     @Exclude({ toPlainOnly: true })
     public stack: string;
-
-    @Transform(params => (!_.isNil(params.value) ? TransformUtil.toJSON(params.value) : null), { toClassOnly: true })
-    @Transform(params => (!_.isNil(params.value) ? TransformUtil.fromJSON(params.value) : null), { toPlainOnly: true })
-    public details: U;
 
     // --------------------------------------------------------------------------
     //
@@ -106,15 +97,18 @@ export class ExtendedError<U = any, V = number> extends Error implements Error {
     //
     // --------------------------------------------------------------------------
 
-    constructor(message: string, code: V = null, details: U = null, isFatal: boolean = true) {
+    constructor(message: string, code?: V, details?: U) {
         super(message);
         Object.defineProperty(this, 'stack', { enumerable: true, writable: true });
         Object.defineProperty(this, 'message', { enumerable: true, writable: true });
 
-        this.code = !_.isNil(code) ? code : (ExtendedError.DEFAULT_ERROR_CODE as any);
+        this.code = !_.isNil(code) ? code : ExtendedError.DEFAULT_ERROR_CODE as any;
         this.message = message;
-        this.details = details;
-        this.isFatal = _.isBoolean(isFatal) ? isFatal : true;
+        this.isExtendedError = true;
+
+        if (!_.isNil(details)) {
+            this.details = details;
+        }
     }
 
     // --------------------------------------------------------------------------
