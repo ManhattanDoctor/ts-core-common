@@ -10,7 +10,7 @@ export class TransportCryptoManagerEd25519 implements ITransportCryptoManager {
     //
     // --------------------------------------------------------------------------
 
-    public static ALGORITHM = Ed25519.ALGORITHM;
+    public static ALGORITHM = 'Ed25519';
 
     // --------------------------------------------------------------------------
     //

@@ -3,15 +3,7 @@ import * as nacl from 'tweetnacl';
 import { IKeyAsymmetric } from './IKeyAsymmetric';
 
 export class Ed25519 {
-
-    // --------------------------------------------------------------------------
-    //
-    //  Static Methods
-    //
-    // --------------------------------------------------------------------------
-
-    public static ALGORITHM = 'Ed25519';
-
+    
     // --------------------------------------------------------------------------
     //
     //  Public Methods
