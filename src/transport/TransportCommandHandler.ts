@@ -14,9 +14,8 @@ export abstract class TransportCommandHandler<U, T extends ITransportCommand<U>,
 
         this.transport.listen<T>(name).subscribe(async command => {
             try {
-                let request = this.checkRequest(command.request);
-                let response = await this.execute(request);
-                this.transport.complete(command, this.checkResponse(response));
+                let response = await this.handleCommand(command);
+                this.transport.complete(command, response);
             } catch (error) {
                 this.handleError(command, error);
             }
@@ -29,8 +28,14 @@ export abstract class TransportCommandHandler<U, T extends ITransportCommand<U>,
     //
     // --------------------------------------------------------------------------
 
-    protected checkResponse(params: V): V {
-        return params;
+    protected async handleCommand(command: T): Promise<V> {
+        let request = this.checkRequest(command.request);
+        let response = await this.execute(request, command);
+        return this.checkResponse(response)
+    }
+
+    protected checkResponse(response: V): V {
+        return response;
     }
 
     // --------------------------------------------------------------------------
@@ -39,5 +44,5 @@ export abstract class TransportCommandHandler<U, T extends ITransportCommand<U>,
     //
     // --------------------------------------------------------------------------
 
-    protected abstract execute(params: U): Promise<V>;
+    protected abstract execute(request: U, ...params): Promise<V>;
 }
