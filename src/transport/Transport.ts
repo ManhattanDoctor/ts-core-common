@@ -116,16 +116,13 @@ export abstract class Transport<S extends ITransportSettings = ITransportSetting
     public abstract sendListen<U, V>(command: ITransportCommandAsync<U, V>, options?: O): Promise<V>;
 
     public getDispatcher<T>(name: string): Observable<T> {
-        let subject = this.dispatchers.get(name);
-        if (!_.isNil(subject)) {
-            return subject.asObservable();
+        let item = this.dispatchers.get(name);
+        if (!_.isNil(item)) {
+            return item.asObservable();
         }
-        subject = new Subject<T>();
-        this.dispatchers.set(name, subject);
-
-        let item = subject.asObservable();
-        item.pipe(takeUntil(this.destroyed)).subscribe(item => this.logEvent(item, TransportLogType.EVENT_RECEIVED));
-        return item;
+        item = new Subject<T>();
+        this.dispatchers.set(name, item);
+        return item.asObservable();
     }
 
     // --------------------------------------------------------------------------

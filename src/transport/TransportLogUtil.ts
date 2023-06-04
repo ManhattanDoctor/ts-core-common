@@ -38,8 +38,10 @@ export class TransportLogUtil {
                 return '⧖';
 
             case TransportLogType.EVENT_SENDED:
-                return '↦';
+                return '↣';
             case TransportLogType.EVENT_RECEIVED:
+                return '↢';
+            case TransportLogType.EVENT_RECEIVED_NO_LISTENER:
                 return '↤';
 
             default:
@@ -80,7 +82,8 @@ export enum TransportLogType {
     RESPONSE_TIMEOUT = 'RESPONSE_TIMEOUT',
 
     EVENT_SENDED = 'EVENT_SENDED',
-    EVENT_RECEIVED = 'EVENT_RECEIVED'
+    EVENT_RECEIVED = 'EVENT_RECEIVED',
+    EVENT_RECEIVED_NO_LISTENER = 'EVENT_RECEIVED_NO_LISTENER'
 }
 
 

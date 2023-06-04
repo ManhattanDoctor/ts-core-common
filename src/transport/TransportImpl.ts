@@ -213,4 +213,13 @@ export abstract class TransportImpl<S extends ITransportSettings = ITransportSet
     }
 
     protected abstract eventRequestExecute<U>(event: ITransportEvent<U>, options?: E): Promise<void>;
+
+    protected async eventRequestReceived<U>(event: ITransportEvent<U>): Promise<void> {
+        this.logEvent(event, this.dispatchers.has(event.name) ? TransportLogType.EVENT_RECEIVED : TransportLogType.EVENT_RECEIVED_NO_LISTENER);
+
+        let item = this.dispatchers.get(event.name);
+        if (!_.isNil(item)) {
+            item.next(event);
+        }
+    }
 }
