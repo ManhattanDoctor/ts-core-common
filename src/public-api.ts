@@ -54,7 +54,6 @@ export * from './settings/AbstractSettingsStorage';
 export * from './trace/ITraceable';
 export * from './trace/TraceUtil';
 //
-export * from './transport/TransportCommandHandlerAbstract';
 export * from './transport/ITransport';
 export * from './transport/ITransportRequest';
 export * from './transport/ITransportResponse';
@@ -62,6 +61,7 @@ export * from './transport/ITransportSettings';
 export * from './transport/Transport';
 export * from './transport/TransportCommand';
 export * from './transport/TransportCommandAsync';
+export * from './transport/TransportEventHandler';
 export * from './transport/TransportCommandAsyncHandler';
 export * from './transport/TransportCommandHandler';
 export * from './transport/TransportCommandOptions';
@@ -81,8 +81,6 @@ export * from './transport/http/ITransportHttpSettings';
 export * from './transport/http/TransportHttp';
 export * from './transport/http/TransportHttpCommand';
 export * from './transport/http/TransportHttpCommandAsync';
-export * from './transport/http/TransportHttpCommandAsyncHandler';
-export * from './transport/http/TransportHttpCommandHandler';
 export * from './transport/local/TransportLocal';
 //
 export * from './util/ArrayUtil';

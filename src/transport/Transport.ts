@@ -1,6 +1,5 @@
 import * as _ from 'lodash';
 import { Observable, Subject } from 'rxjs';
-import { takeUntil } from 'rxjs/operators';
 import { ExtendedError } from '../error';
 import { LoadableEvent } from '../Loadable';
 import { ILogger, LoggerWrapper } from '../logger';

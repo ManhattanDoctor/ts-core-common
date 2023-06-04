@@ -1,8 +1,19 @@
-import { ILogger } from '../logger';
-import { TransportCommandHandlerAbstract } from './TransportCommandHandlerAbstract';
+import { ILogger, LoggerWrapper } from '../logger';
 import { ITransport, ITransportCommand } from './ITransport';
+import { TransportWaitError } from './error';
+import { ExtendedError } from '../error';
+import { takeUntil } from 'rxjs';
+import * as _ from 'lodash';
 
-export abstract class TransportCommandHandler<U, T extends ITransportCommand<U>, V = void> extends TransportCommandHandlerAbstract<U, T> {
+export abstract class TransportCommandHandler<U, T extends ITransportCommand<U>, V = void> extends LoggerWrapper {
+    // --------------------------------------------------------------------------
+    //
+    //  Properties
+    //
+    // --------------------------------------------------------------------------
+
+    protected transport: ITransport;
+
     // --------------------------------------------------------------------------
     //
     //  Constructor
@@ -10,9 +21,10 @@ export abstract class TransportCommandHandler<U, T extends ITransportCommand<U>,
     // --------------------------------------------------------------------------
 
     protected constructor(logger: ILogger, transport: ITransport, name: string) {
-        super(logger, transport);
+        super(logger);
 
-        this.transport.listen<T>(name).subscribe(async command => {
+        this.transport = transport;
+        this.transport.listen<T>(name).pipe(takeUntil(this.destroyed)).subscribe(async command => {
             try {
                 let response = await this.handleCommand(command);
                 this.transport.complete(command, response);
@@ -20,6 +32,20 @@ export abstract class TransportCommandHandler<U, T extends ITransportCommand<U>,
                 this.handleError(command, error);
             }
         });
+    }
+
+    // --------------------------------------------------------------------------
+    //
+    //  Public Methods
+    //
+    // --------------------------------------------------------------------------
+
+    public destroy(): void {
+        if (this.isDestroyed) {
+            return;
+        }
+        super.destroy();
+        this.transport = null;
     }
 
     // --------------------------------------------------------------------------
@@ -32,6 +58,25 @@ export abstract class TransportCommandHandler<U, T extends ITransportCommand<U>,
         let request = this.checkRequest(command.request);
         let response = await this.execute(request, command);
         return this.checkResponse(response)
+    }
+
+    protected handleError(command: T, error: Error): void {
+        if (TransportWaitError.instanceOf(error)) {
+            this.transport.wait(command);
+            return;
+        }
+        if (_.isNil(error)) {
+            error = new ExtendedError(`Undefined error`);
+        }
+        else if (_.isString(error)) {
+            error = new ExtendedError(error);
+        }
+        this.transport.complete(command, error);
+        this.error(error, error.stack);
+    }
+
+    protected checkRequest(params: U): U {
+        return params;
     }
 
     protected checkResponse(response: V): V {
