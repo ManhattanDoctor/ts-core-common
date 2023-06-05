@@ -107,7 +107,7 @@ export abstract class TransportImpl<S extends ITransportSettings = ITransportSet
     }
 
     protected commandRequestErrorParse(error: any): ExtendedError {
-        return ExtendedError.instanceOf(error) || error instanceof Error ? ExtendedError.create(error) : new ExtendedError(`Unknown error`, ExtendedError.DEFAULT_ERROR_CODE, error);
+        return this.parseError(error);
     }
 
     protected commandRequestResponseReceived<U, V>(promise: ITransportCommandPromise<U, V>, result?: V | Error): void {
@@ -148,16 +148,16 @@ export abstract class TransportImpl<S extends ITransportSettings = ITransportSet
         }
     }
 
-    protected commandResponseErrorCatch<U>(command: ITransportCommand<U>, request: R, error: any): void {
+    protected commandResponseErrorCatch<U, V>(command: ITransportCommandAsync<U, V>, request: R, error: any): void {
         error = this.commandResponseErrorParse(error);
         this.warn(`Unable to send "${command}" command response: ${error.toString()}`);
     }
 
     protected commandResponseErrorParse(error: any): ExtendedError {
-        return ExtendedError.instanceOf(error) || error instanceof Error ? ExtendedError.create(error) : new ExtendedError(`Unknown error`, ExtendedError.DEFAULT_ERROR_CODE, error);
+        return this.parseError(error);
     }
 
-    protected abstract commandResponseExecute<U>(command: ITransportCommand<U>, request: R): Promise<void>;
+    protected abstract commandResponseExecute<U, V>(command: ITransportCommandAsync<U, V>, request: R): Promise<void>;
 
     protected checkCommandNeedReply<U, V>(command: ITransportCommand<U>, request: R): boolean {
         if (request.isNeedReply) {
@@ -209,7 +209,7 @@ export abstract class TransportImpl<S extends ITransportSettings = ITransportSet
     }
 
     protected eventRequestErrorParse(error: any): ExtendedError {
-        return ExtendedError.instanceOf(error) || error instanceof Error ? ExtendedError.create(error) : new ExtendedError(`Unknown error`, ExtendedError.DEFAULT_ERROR_CODE, error);
+        return this.parseError(error);
     }
 
     protected abstract eventRequestExecute<U>(event: ITransportEvent<U>, options?: E): Promise<void>;
@@ -221,5 +221,15 @@ export abstract class TransportImpl<S extends ITransportSettings = ITransportSet
         if (!_.isNil(item)) {
             item.next(event);
         }
+    }
+
+    // --------------------------------------------------------------------------
+    //
+    //  Protected Methods
+    //
+    // --------------------------------------------------------------------------
+
+    protected parseError(error: any): ExtendedError {
+        return ExtendedError.instanceOf(error) || error instanceof Error ? ExtendedError.create(error) : new ExtendedError(`Unknown error`, ExtendedError.DEFAULT_ERROR_CODE, error);
     }
 }

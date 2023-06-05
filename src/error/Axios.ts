@@ -14,9 +14,10 @@ export function isAxiosError(item: any): item is AxiosError {
 
 export function parseAxiosError(item: AxiosError): ExtendedError {
     let response = item.response;
-    if (_.isNil(response)) {
+    if (_.isNil(response) || _.isNil(response.data)) {
+        let status = ExtendedError.HTTP_CODE_BAD_REQUEST;
         let message = !_.isEmpty(item.message) ? item.message : item.toString();
-        return new ExtendedError(message, ExtendedError.HTTP_CODE_INTERNAL_SERVER_ERROR, item);
+        return new ExtendedError(message, status, item);
     }
     if (ExtendedError.instanceOf(response.data)) {
         return ExtendedError.create(response.data);
