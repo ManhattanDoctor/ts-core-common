@@ -70,7 +70,10 @@ export class ExtendedError<U = any, V = number> extends Error implements Error {
     }
 
     public static instanceOf(item: any): boolean {
-        return !_.isNil(item) ? item instanceof ExtendedError || item.isExtendedError || ObjectUtil.instanceOf<ExtendedError>(item, ['code', 'message', 'details']) : false;
+        if (_.isNil(item)) {
+            return false;
+        }
+        return item instanceof ExtendedError || item.isExtendedError || ObjectUtil.instanceOf<ExtendedError>(item, ['code', 'message', 'details']);
     }
 
     // --------------------------------------------------------------------------

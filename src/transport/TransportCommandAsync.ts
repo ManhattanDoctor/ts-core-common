@@ -1,5 +1,4 @@
 import { ExtendedError } from '../error';
-import { TransformUtil } from '../util';
 import { ITransportCommandAsync } from './ITransport';
 import { ITransportResponse } from './ITransportResponse';
 import { TransportCommand } from './TransportCommand';
@@ -42,7 +41,7 @@ export class TransportCommandAsync<U, V> extends TransportCommand<U> implements 
     // --------------------------------------------------------------------------
 
     protected validateResponse(value: V | ExtendedError | Error): V {
-        if (ExtendedError.instanceOf(value) || value instanceof Error) {
+        if (value instanceof Error || ExtendedError.instanceOf(value)) {
             throw ExtendedError.create(value);
         }
         value = this.checkResponse(value);
