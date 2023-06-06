@@ -150,7 +150,7 @@ export abstract class TransportImpl<S extends ITransportSettings = ITransportSet
 
     protected commandResponseErrorCatch<U, V>(command: ITransportCommandAsync<U, V>, request: R, error: any): void {
         error = this.commandResponseErrorParse(error);
-        this.warn(`Unable to send "${command}" command response: ${error.toString()}`);
+        this.warn(`Unable to send "${command.name}" command response: ${error.toString()}`);
     }
 
     protected commandResponseErrorParse(error: any): ExtendedError {
@@ -177,7 +177,7 @@ export abstract class TransportImpl<S extends ITransportSettings = ITransportSet
 
     protected eventRequestErrorCatch<U>(event: ITransportEvent<U>, options: E, error: any): void {
         error = this.commandResponseErrorParse(error);
-        this.warn(`Unable to send "${event}" command response: ${error.toString()}`);
+        this.warn(`Unable to send "${event.name}" event: ${error.toString()}`);
     }
 
     protected eventRequestErrorParse(error: any): ExtendedError {
