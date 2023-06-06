@@ -138,7 +138,7 @@ export abstract class TransportImpl<S extends ITransportSettings = ITransportSet
         }
     }
 
-    protected async commandResponseDispatch<U>(command: ITransportCommand<U>, options: O, isNeedReply: boolean): Promise<void> {
+    protected async commandResponseRequestDispatch<U>(command: ITransportCommand<U>, options: O, isNeedReply: boolean): Promise<void> {
         let listener = this.listeners.get(command.name);
         if (_.isNil(listener)) {
             this.complete(command, new ExtendedError(`No listener for "${command.name}" command`));
@@ -158,34 +158,6 @@ export abstract class TransportImpl<S extends ITransportSettings = ITransportSet
     }
 
     protected abstract commandResponseExecute<U, V>(command: ITransportCommandAsync<U, V>, request: R): Promise<void>;
-
-    protected checkCommandNeedReply<U, V>(command: ITransportCommand<U>, request: R): boolean {
-        if (request.isNeedReply) {
-            return true;
-        }
-        this.logCommand(command, TransportLogType.RESPONSE_NO_REPLY);
-        return false;
-    }
-
-    protected checkRequestCommandExpired<U>(command: ITransportCommand<U>, request: R): boolean {
-        if (!this.isCommandRequestExpired(request)) {
-            return false;
-        }
-        this.logCommand(command, TransportLogType.REQUEST_EXPIRED);
-        return true;
-    }
-
-    protected checkResponseCommandExpired<U>(command: ITransportCommand<U>, request: R): boolean {
-        if (!this.isCommandRequestExpired(request)) {
-            return false;
-        }
-        this.logCommand(command, TransportLogType.RESPONSE_EXPIRED);
-        return true;
-    }
-
-    protected isCommandResponseError<V>(result: V | Error): boolean {
-        return ExtendedError.instanceOf(result) || result instanceof Error;
-    }
 
     // --------------------------------------------------------------------------
     //
@@ -228,6 +200,34 @@ export abstract class TransportImpl<S extends ITransportSettings = ITransportSet
     //  Protected Methods
     //
     // --------------------------------------------------------------------------
+
+    protected checkCommandNeedReply<U, V>(command: ITransportCommand<U>, request: R): boolean {
+        if (request.isNeedReply) {
+            return true;
+        }
+        this.logCommand(command, TransportLogType.RESPONSE_NO_REPLY);
+        return false;
+    }
+
+    protected checkRequestCommandExpired<U>(command: ITransportCommand<U>, request: R): boolean {
+        if (!this.isCommandRequestExpired(request)) {
+            return false;
+        }
+        this.logCommand(command, TransportLogType.REQUEST_EXPIRED);
+        return true;
+    }
+
+    protected checkResponseCommandExpired<U>(command: ITransportCommand<U>, request: R): boolean {
+        if (!this.isCommandRequestExpired(request)) {
+            return false;
+        }
+        this.logCommand(command, TransportLogType.RESPONSE_EXPIRED);
+        return true;
+    }
+
+    protected isCommandResponseError<V>(result: V | Error): boolean {
+        return ExtendedError.instanceOf(result) || result instanceof Error;
+    }
 
     protected parseError(error: any): ExtendedError {
         return ExtendedError.instanceOf(error) || error instanceof Error ? ExtendedError.create(error) : new ExtendedError(`Unknown error`, ExtendedError.DEFAULT_ERROR_CODE, error);

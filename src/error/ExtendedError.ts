@@ -48,11 +48,8 @@ export class ExtendedError<U = any, V = number> extends Error implements Error {
     // --------------------------------------------------------------------------
 
     public static create(item: Error | ExtendedError | any, code?: any): ExtendedError {
-        if (item instanceof ExtendedError) {
-            return item;
-        }
         if (ExtendedError.instanceOf(item)) {
-            return TransformUtil.toClass(ExtendedError, item);
+            return item instanceof ExtendedError ? item : TransformUtil.toClass(ExtendedError, item);
         }
         if (_.isNil(code)) {
             code = ExtendedError.DEFAULT_ERROR_CODE;
@@ -73,7 +70,7 @@ export class ExtendedError<U = any, V = number> extends Error implements Error {
     }
 
     public static instanceOf(item: any): boolean {
-        return item instanceof ExtendedError || item.isExtendedError || ObjectUtil.instanceOf<ExtendedError>(item, ['code', 'message', 'details']);
+        return !_.isNil(item) ? item instanceof ExtendedError || item.isExtendedError || ObjectUtil.instanceOf<ExtendedError>(item, ['code', 'message', 'details']) : false;
     }
 
     // --------------------------------------------------------------------------

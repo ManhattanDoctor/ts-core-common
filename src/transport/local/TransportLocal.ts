@@ -17,7 +17,7 @@ export class TransportLocal extends TransportImpl<ITransportSettings> {
     protected async commandRequestExecute<U>(command: ITransportCommand<U>, options: ITransportCommandOptions, isNeedReply: boolean): Promise<void> {
         this.logCommand(command, TransportLogType.REQUEST_RECEIVED);
         this.requests.set(command.id, { waited: 0, isNeedReply });
-        return this.commandResponseDispatch(command, options, isNeedReply);
+        return this.commandResponseRequestDispatch(command, options, isNeedReply);
     }
 
     protected async commandResponseExecute<U, V>(command: ITransportCommandAsync<U, V>, request: ITransportCommandRequest): Promise<void> {
