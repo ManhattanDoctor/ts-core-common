@@ -69,7 +69,7 @@ export abstract class TransportImpl<S extends ITransportSettings = ITransportSet
 
     public dispatch<T>(event: ITransportEvent<T>, options?: E): void {
         TraceUtil.addIfNeed(event);
-        this.eventRequest(event, options);
+        this.eventRequest(event, this.getEventOptions(event, options));
     }
 
     // --------------------------------------------------------------------------
@@ -165,7 +165,7 @@ export abstract class TransportImpl<S extends ITransportSettings = ITransportSet
     //
     // --------------------------------------------------------------------------
 
-    protected async eventRequest<U>(event: ITransportEvent<U>, options?: E): Promise<void> {
+    protected async eventRequest<U>(event: ITransportEvent<U>, options: E): Promise<void> {
         try {
             this.logEvent(event, TransportLogType.EVENT_SENDED);
             await this.eventRequestExecute(event, options);
@@ -184,7 +184,7 @@ export abstract class TransportImpl<S extends ITransportSettings = ITransportSet
         return this.parseError(error);
     }
 
-    protected abstract eventRequestExecute<U>(event: ITransportEvent<U>, options?: E): Promise<void>;
+    protected abstract eventRequestExecute<U>(event: ITransportEvent<U>, options: E): Promise<void>;
 
     protected async eventRequestReceived<U>(event: ITransportEvent<U>): Promise<void> {
         this.logEvent(event, this.dispatchers.has(event.name) ? TransportLogType.EVENT_RECEIVED : TransportLogType.EVENT_RECEIVED_NO_LISTENER);
@@ -193,6 +193,13 @@ export abstract class TransportImpl<S extends ITransportSettings = ITransportSet
         if (!_.isNil(item)) {
             item.next(event);
         }
+    }
+
+    protected getEventOptions<U>(event: ITransportEvent<U>, options?: E): E {
+        if (_.isNil(options)) {
+            options = {} as E;
+        }
+        return options;
     }
 
     // --------------------------------------------------------------------------
