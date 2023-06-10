@@ -16,8 +16,11 @@ export class TransportWaitError extends ExtendedError<void, string> {
     //
     // --------------------------------------------------------------------------
 
-    public static instanceOf(data: any): data is TransportWaitError {
-        return data instanceof TransportWaitError || data.code === TransportWaitError.ERROR_CODE;
+    public static instanceOf(item: any): item is TransportWaitError {
+        if (_.isNil(item)) {
+            return false;
+        }
+        return item instanceof TransportWaitError || item.code === TransportWaitError.ERROR_CODE;
     }
 
     // --------------------------------------------------------------------------
