@@ -1,4 +1,4 @@
-import { ITransportCommandAsync } from './ITransport';
+import { ITransport, ITransportCommandAsync } from './ITransport';
 import { TransportCommandHandler } from './TransportCommandHandler';
 
-export abstract class TransportCommandAsyncHandler<U, V, T extends ITransportCommandAsync<U, V>> extends TransportCommandHandler<U, T, V> { }
+export abstract class TransportCommandAsyncHandler<U, V, C extends ITransportCommandAsync<U, V>, T extends ITransport = ITransport> extends TransportCommandHandler<U, C, V, T> { }

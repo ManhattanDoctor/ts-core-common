@@ -5,14 +5,14 @@ import { ExtendedError } from '../error';
 import { takeUntil } from 'rxjs';
 import * as _ from 'lodash';
 
-export abstract class TransportCommandHandler<U, T extends ITransportCommand<U>, V = void> extends LoggerWrapper {
+export abstract class TransportCommandHandler<U, C extends ITransportCommand<U>, V = void, T extends ITransport = ITransport> extends LoggerWrapper {
     // --------------------------------------------------------------------------
     //
     //  Properties
     //
     // --------------------------------------------------------------------------
 
-    protected transport: ITransport;
+    protected transport: T;
 
     // --------------------------------------------------------------------------
     //
@@ -20,11 +20,11 @@ export abstract class TransportCommandHandler<U, T extends ITransportCommand<U>,
     //
     // --------------------------------------------------------------------------
 
-    protected constructor(logger: ILogger, transport: ITransport, name: string) {
+    protected constructor(logger: ILogger, transport: T, name: string) {
         super(logger);
 
         this.transport = transport;
-        this.transport.listen<T>(name).pipe(takeUntil(this.destroyed)).subscribe(async command => {
+        this.transport.listen<C>(name).pipe(takeUntil(this.destroyed)).subscribe(async command => {
             try {
                 let response = await this.handleCommand(command);
                 this.transport.complete(command, response);
@@ -54,13 +54,13 @@ export abstract class TransportCommandHandler<U, T extends ITransportCommand<U>,
     //
     // --------------------------------------------------------------------------
 
-    protected async handleCommand(command: T): Promise<V> {
+    protected async handleCommand(command: C): Promise<V> {
         let request = this.checkRequest(command.request);
         let response = await this.execute(request, command);
         return this.checkResponse(response)
     }
 
-    protected handleError(command: T, error: Error): void {
+    protected handleError(command: C, error: Error): void {
         if (TransportWaitError.instanceOf(error)) {
             this.transport.wait(command);
             return;
