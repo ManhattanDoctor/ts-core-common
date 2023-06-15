@@ -254,7 +254,7 @@ export abstract class Transport<S extends ITransportSettings = ITransportSetting
     // --------------------------------------------------------------------------
 
     protected getCommandTimeoutDelay<U>(command: ITransportCommand<U>, options: O): number {
-        return !_.isNil(options) && _.isNil(options.timeout) ? options.timeout : Transport.DEFAULT_TIMEOUT;
+        return !_.isNil(options) && !_.isNil(options.timeout) ? options.timeout : Transport.DEFAULT_TIMEOUT;
     }
 
     protected isCommandRequestExpired(request: R): boolean {
