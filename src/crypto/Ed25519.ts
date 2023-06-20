@@ -3,7 +3,7 @@ import * as nacl from 'tweetnacl';
 import { IKeyAsymmetric } from './IKeyAsymmetric';
 
 export class Ed25519 {
-    
+
     // --------------------------------------------------------------------------
     //
     //  Public Methods
@@ -12,22 +12,16 @@ export class Ed25519 {
 
     public static keys(): IKeyAsymmetric {
         let keys = nacl.sign.keyPair();
-        return {
-            publicKey: Buffer.from(keys.publicKey).toString('hex'),
-            privateKey: Buffer.from(keys.secretKey).toString('hex')
-        };
+        return { publicKey: Buffer.from(keys.publicKey).toString('hex'), privateKey: Buffer.from(keys.secretKey).toString('hex') };
     }
 
     public static nonce(): string {
-        return Buffer.from(nacl.randomBytes(24)).toString('hex')
+        return Buffer.from(nacl.randomBytes(nacl.secretbox.nonceLength)).toString('hex')
     }
 
     public static from(privateKey: string): IKeyAsymmetric {
         let keys = nacl.sign.keyPair.fromSecretKey(Buffer.from(privateKey, 'hex'));
-        return {
-            publicKey: Buffer.from(keys.publicKey).toString('hex'),
-            privateKey: Buffer.from(keys.secretKey).toString('hex')
-        };
+        return { publicKey: Buffer.from(keys.publicKey).toString('hex'), privateKey: Buffer.from(keys.secretKey).toString('hex') };
     }
 
     public static sign(message: string, privateKey: string): string {

@@ -7,6 +7,7 @@ export * from './ISerializable';
 export * from './Loadable';
 //
 export * from './crypto/Ed25519';
+export * from './crypto/Ed25519Box';
 export * from './crypto/IKeyAsymmetric';
 export * from './crypto/ISignature';
 export * from './crypto/TweetNaCl';
