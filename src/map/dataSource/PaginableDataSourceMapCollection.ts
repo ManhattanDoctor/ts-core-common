@@ -64,14 +64,14 @@ export abstract class PaginableDataSourceMapCollection<U, V = any, T = any> exte
     }
 
     protected isAbleToLoad(): boolean {
-        if (this.pages > 0 && this.pageIndex > this.pages - 1) {
+        if (this.pages > 0 && this.isLastPage) {
             return false;
         }
         return !this.isLoading;
     }
 
     protected checkIsAllLoaded(response: IPagination<V>, items: Array<any>): void {
-        this._isAllLoaded = this.pageIndex >= this.pages - 1 || this.pageSize > items.length;
+        this._isAllLoaded = this.isLastPage || this.pageSize > items.length;
     }
 
     // --------------------------------------------------------------------------
@@ -121,4 +121,13 @@ export abstract class PaginableDataSourceMapCollection<U, V = any, T = any> exte
     public get total(): number {
         return this._total;
     }
+
+    public get isLastPage(): boolean {
+        return this.pageIndex >= this.pages - 1;
+    }
+
+    public get isFistPage(): boolean {
+        return this.pageIndex === 0;
+    }
+
 }

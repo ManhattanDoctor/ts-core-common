@@ -47,7 +47,7 @@ export class ExtendedError<U = any, V = number> extends Error implements Error {
     //
     // --------------------------------------------------------------------------
 
-    public static create(item: Error | ExtendedError | any, code?: any): ExtendedError {
+    public static create<U, V>(item: Error | ExtendedError<U, V> | any, code?: any): ExtendedError<U, V> {
         if (ExtendedError.instanceOf(item)) {
             return item instanceof ExtendedError ? item : TransformUtil.toClass(ExtendedError, item);
         }
@@ -59,7 +59,7 @@ export class ExtendedError<U = any, V = number> extends Error implements Error {
             if (!_.isEmpty(item.name)) {
                 message = `[${item.name}] ${message}`;
             }
-            return new ExtendedError(message, code, item.stack);
+            return new ExtendedError<U, V>(message, code as any, item.stack as any);
         }
 
         let message = !_.isNil(item.message) ? item.message : ExtendedError.DEFAULT_ERROR_MESSAGE;

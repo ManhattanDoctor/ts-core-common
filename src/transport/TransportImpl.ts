@@ -236,7 +236,7 @@ export abstract class TransportImpl<S extends ITransportSettings = ITransportSet
         return ExtendedError.instanceOf(result) || result instanceof Error;
     }
 
-    protected parseError(error: any): ExtendedError {
-        return ExtendedError.instanceOf(error) || error instanceof Error ? ExtendedError.create(error) : new ExtendedError(`Unknown error`, ExtendedError.DEFAULT_ERROR_CODE, error);
+    protected parseError<U, V>(error: any): ExtendedError<U, V> {
+        return ExtendedError.instanceOf(error) || error instanceof Error ? ExtendedError.create<U, V>(error) : new ExtendedError<U, V>(`Unknown error`, ExtendedError.DEFAULT_ERROR_CODE as any, error);
     }
 }

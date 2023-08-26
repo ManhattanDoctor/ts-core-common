@@ -14,6 +14,7 @@ export class MapCollection<U> extends Destroyable {
     protected uidPropertyName: keyof U;
 
     protected _length: number;
+    protected _isEmpty: boolean;
     protected _maxLength: number;
     protected _collection: Array<U>;
 
@@ -34,6 +35,7 @@ export class MapCollection<U> extends Destroyable {
         this.uidPropertyName = uidPropertyName;
 
         this._length = 0;
+        this._isEmpty = true;
         this._collection = [];
         this._maxLength = maxLength;
     }
@@ -120,7 +122,7 @@ export class MapCollection<U> extends Destroyable {
             return;
         }
         super.destroy();
-        
+
         this.clear();
         this.map = null;
         this._collection = null;
@@ -182,6 +184,7 @@ export class MapCollection<U> extends Destroyable {
 
     protected setLength(value: number): void {
         this._length = value;
+        this._isEmpty = value === 0;
     }
 
     protected checkMaxLength(): void {
@@ -214,6 +217,10 @@ export class MapCollection<U> extends Destroyable {
 
     public get length(): number {
         return this._length;
+    }
+
+    public get isEmpty(): boolean {
+        return this._isEmpty;
     }
 
     public get maxLength(): number {

@@ -12,12 +12,12 @@ export function isAxiosError(item: any): item is AxiosError {
     return _.isBoolean(item.isAxiosError) ? item.isAxiosError : false;
 }
 
-export function parseAxiosError(item: AxiosError): ExtendedError {
+export function parseAxiosError<U, V>(item: AxiosError): ExtendedError<U, V> {
     let response = item.response;
     if (_.isNil(response) || _.isNil(response.data)) {
         let status = ExtendedError.HTTP_CODE_BAD_REQUEST;
         let message = !_.isEmpty(item.message) ? item.message : item.toString();
-        return new ExtendedError(message, status, item);
+        return new ExtendedError<U, V>(message, status as any, item as any);
     }
     if (ExtendedError.instanceOf(response.data)) {
         return ExtendedError.create(response.data);
@@ -29,5 +29,5 @@ export function parseAxiosError(item: AxiosError): ExtendedError {
             message = error;
         }
     }
-    return new ExtendedError(message, response.status, response.data);
+    return new ExtendedError(message, response.status as any, response.data as any);
 }

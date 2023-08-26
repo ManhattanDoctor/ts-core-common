@@ -98,7 +98,7 @@ export class TransportHttp<S extends ITransportHttpSettings = ITransportHttpSett
         return TransportHttp.isError(data);
     }
 
-    protected parseError(error: any): ExtendedError {
+    protected parseError<U, V>(error: any): ExtendedError<U, V> {
         return isAxiosError(error) ? parseAxiosError(error) : super.parseError(error);
     }
 
