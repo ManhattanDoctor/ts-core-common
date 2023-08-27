@@ -22,6 +22,24 @@ export abstract class PaginableDataSourceMapCollection<U, V = any, T = any> exte
     //
     // --------------------------------------------------------------------------
 
+    public async pageNext(isLoop: boolean): Promise<boolean> {
+        if (this.isLastPage && !isLoop) {
+            return false;
+        }
+        this.pageIndex = this.isLastPage ? 0 : this.pageIndex + 1;
+        await this.load();
+        return true;
+    }
+
+    public async pagePrevious(isLoop: boolean): Promise<boolean> {
+        if (this.isFistPage && !isLoop) {
+            return false;
+        }
+        this.pageIndex = this.isFistPage ? this.pages - 1 : this.pageIndex - 1;
+        await this.load();
+        return true;
+    }
+
     public reload(): Promise<void> {
         this._pages = 0;
         this._pageIndex = 0;
