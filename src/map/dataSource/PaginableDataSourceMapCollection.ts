@@ -22,6 +22,7 @@ export abstract class PaginableDataSourceMapCollection<U, V = any, T = any> exte
     //
     // --------------------------------------------------------------------------
 
+
     public async pageNext(isLoop: boolean): Promise<boolean> {
         if (this.isLastPage && !isLoop) {
             return false;
@@ -82,7 +83,7 @@ export abstract class PaginableDataSourceMapCollection<U, V = any, T = any> exte
     }
 
     protected isAbleToLoad(): boolean {
-        if (this.pages > 0 && this.isLastPage) {
+        if (this.pages > 0 && this.pageIndex > this.pages - 1) {
             return false;
         }
         return !this.isLoading;
@@ -90,6 +91,7 @@ export abstract class PaginableDataSourceMapCollection<U, V = any, T = any> exte
 
     protected checkIsAllLoaded(response: IPagination<V>, items: Array<any>): void {
         this._isAllLoaded = this.isLastPage || this.pageSize > items.length;
+        // this._isAllLoaded = this.pageIndex >= this.pages - 1 || this.pageSize > items.length;
     }
 
     // --------------------------------------------------------------------------
