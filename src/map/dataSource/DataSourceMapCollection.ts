@@ -57,7 +57,7 @@ export abstract class DataSourceMapCollection<U, V = any> extends DestroyableMap
         this.observer.next(new ObservableData(DataSourceMapCollectionEvent.DATA_LOADED_AND_PARSED, parsed));
     }
 
-    protected parseError(error: ExtendedError): void {}
+    protected parseError(error: ExtendedError): void { }
 
     protected getResponseItems(response: V): Array<any> {
         return _.isArray(response) ? response : [];
@@ -79,7 +79,7 @@ export abstract class DataSourceMapCollection<U, V = any> extends DestroyableMap
         if (value === this._length) {
             return;
         }
-        this._length = value;
+        super.setLength(value);
         this.observer.next(new ObservableData(DataSourceMapCollectionEvent.MAP_LENGTH_CHANGED));
     }
 
@@ -162,8 +162,7 @@ export abstract class DataSourceMapCollection<U, V = any> extends DestroyableMap
 
         this.observer.complete();
         this.observer = null;
-
-        this._length = null;
+        
         this.reloadHandler = null;
     }
 
