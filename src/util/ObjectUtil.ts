@@ -89,6 +89,34 @@ export class ObjectUtil {
         }
     }
 
+    public static clearKeysNil<T>(item: T): void {
+        if (!_.isObject(item)) {
+            return;
+        }
+        for (let [key, value] of Object.entries(item)) {
+            if (_.isObject(value)) {
+                this.clearKeysNil(value);
+            }
+            else if (_.isNil(value)) {
+                delete item[key];
+            }
+        }
+    }
+
+    public static clearKeysEmpty<T>(item: T): void {
+        if (!_.isObject(item)) {
+            return;
+        }
+        for (let [key, value] of Object.entries(item)) {
+            if (_.isObject(value)) {
+                this.clearKeysEmpty(value);
+            }
+            else if (_.isEmpty(value)) {
+                delete item[key];
+            }
+        }
+    }
+
     public static keys<U, V extends keyof U>(from: U): Array<V> {
         return Object.getOwnPropertyNames(from) as any;
     }
@@ -108,7 +136,7 @@ export class ObjectUtil {
         for (let key of includeKeys) {
             try {
                 to[key] = from[key];
-            } catch (error) {}
+            } catch (error) { }
         }
         return to;
     }
@@ -128,7 +156,7 @@ export class ObjectUtil {
         for (let key of includeKeys) {
             to[key] = from[key];
         }
-        
+
         return to;
     }
 
