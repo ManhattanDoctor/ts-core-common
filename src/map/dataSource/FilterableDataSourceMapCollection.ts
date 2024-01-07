@@ -110,15 +110,7 @@ export abstract class FilterableDataSourceMapCollection<U, V = any, T = any> ext
             this.reload();
         }
     }
-
-    /*
-    public async reload(): Promise<void> {
-        // this.setLength(0);
-        // this.clear();
-        return super.reload();
-    }
-    */
-
+    
     public destroy(): void {
         if (this.isDestroyed) {
             return;

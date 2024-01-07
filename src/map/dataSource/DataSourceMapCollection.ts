@@ -1,9 +1,9 @@
-import * as _ from 'lodash';
-import { Observable, Subject, Subscription } from 'rxjs';
+import { Observable, Subject, Subscription, filter, map, takeUntil } from 'rxjs';
 import { ExtendedError } from '../../error/ExtendedError';
 import { LoadableEvent } from '../../Loadable';
 import { ObservableData } from '../../observer/ObservableData';
 import { DestroyableMapCollection } from '../DestroyableMapCollection';
+import * as _ from 'lodash';
 
 export abstract class DataSourceMapCollection<U, V = any> extends DestroyableMapCollection<U> {
     // --------------------------------------------------------------------------
@@ -20,8 +20,8 @@ export abstract class DataSourceMapCollection<U, V = any> extends DestroyableMap
     protected reloadHandler: () => void;
     protected isReloadRequest: boolean = false;
 
+    protected observer: Subject<ObservableData<LoadableEvent | DataSourceMapCollectionEvent, number | V | Array<U>>>;
     protected subscription: Subscription;
-    protected observer: Subject<ObservableData<LoadableEvent | DataSourceMapCollectionEvent, V | Array<U>>>;
 
     // --------------------------------------------------------------------------
     //
@@ -80,7 +80,7 @@ export abstract class DataSourceMapCollection<U, V = any> extends DestroyableMap
             return;
         }
         super.setLength(value);
-        this.observer.next(new ObservableData(DataSourceMapCollectionEvent.MAP_LENGTH_CHANGED));
+        this.observer.next(new ObservableData(DataSourceMapCollectionEvent.MAP_LENGTH_CHANGED, value));
     }
 
     // --------------------------------------------------------------------------
@@ -162,8 +162,66 @@ export abstract class DataSourceMapCollection<U, V = any> extends DestroyableMap
 
         this.observer.complete();
         this.observer = null;
-        
+
         this.reloadHandler = null;
+    }
+
+    // --------------------------------------------------------------------------
+    //
+    //	Event Properties
+    //
+    // --------------------------------------------------------------------------
+
+    public get events(): Observable<ObservableData<LoadableEvent | DataSourceMapCollectionEvent, V | number | Array<U>>> {
+        return this.observer.asObservable();
+    }
+
+    public get started(): Observable<void> {
+        return this.events.pipe(
+            filter(item => item.type === LoadableEvent.STARTED),
+            map(() => null),
+            takeUntil(this.destroyed)
+        );
+    }
+
+    public get completed(): Observable<V> {
+        return this.events.pipe(
+            filter(item => item.type === LoadableEvent.COMPLETE),
+            map(item => item.data as V),
+            takeUntil(this.destroyed)
+        );
+    }
+
+    public get errored(): Observable<ExtendedError> {
+        return this.events.pipe(
+            filter(item => item.type === LoadableEvent.ERROR),
+            map(item => item.error),
+            takeUntil(this.destroyed)
+        );
+    }
+
+    public get finished(): Observable<void> {
+        return this.events.pipe(
+            filter(item => item.type === LoadableEvent.FINISHED),
+            map(() => null),
+            takeUntil(this.destroyed)
+        );
+    }
+
+    public get mapLengthChanged(): Observable<number> {
+        return this.events.pipe(
+            filter(item => item.type === DataSourceMapCollectionEvent.MAP_LENGTH_CHANGED),
+            map(item => Number(item.data)),
+            takeUntil(this.destroyed)
+        );
+    }
+
+    public get dataLoadedAndParsed(): Observable<Array<U>> {
+        return this.events.pipe(
+            filter(item => item.type === DataSourceMapCollectionEvent.DATA_LOADED_AND_PARSED),
+            map(item => item.data as Array<U>),
+            takeUntil(this.destroyed)
+        );
     }
 
     // --------------------------------------------------------------------------
@@ -171,10 +229,6 @@ export abstract class DataSourceMapCollection<U, V = any> extends DestroyableMap
     //	Public Properties
     //
     // --------------------------------------------------------------------------
-
-    public get events(): Observable<ObservableData<LoadableEvent | DataSourceMapCollectionEvent, V | Array<U>>> {
-        return this.observer.asObservable();
-    }
 
     public get isLoading(): boolean {
         return this._isLoading;

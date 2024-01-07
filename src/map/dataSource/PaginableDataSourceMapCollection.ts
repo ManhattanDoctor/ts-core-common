@@ -1,8 +1,8 @@
-import * as _ from 'lodash';
 import { IPage } from '../../dto/IPage';
 import { IPaginable } from '../../dto/IPaginable';
 import { IPagination } from '../../dto/IPagination';
 import { FilterableDataSourceMapCollection } from './FilterableDataSourceMapCollection';
+import * as _ from 'lodash';
 
 export abstract class PaginableDataSourceMapCollection<U, V = any, T = any> extends FilterableDataSourceMapCollection<U, IPagination<V>, T> implements IPage {
     // --------------------------------------------------------------------------
@@ -91,7 +91,6 @@ export abstract class PaginableDataSourceMapCollection<U, V = any, T = any> exte
 
     protected checkIsAllLoaded(response: IPagination<V>, items: Array<any>): void {
         this._isAllLoaded = this.isLastPage || this.pageSize > items.length;
-        // this._isAllLoaded = this.pageIndex >= this.pages - 1 || this.pageSize > items.length;
     }
 
     // --------------------------------------------------------------------------

@@ -1,7 +1,7 @@
 import { Observable, Subject } from 'rxjs';
 import { DestroyableContainer } from './DestroyableContainer';
 import { ObservableData } from './observer';
-import { filter, map } from 'rxjs/operators';
+import { filter, map, takeUntil } from 'rxjs/operators';
 import { ExtendedError } from './error';
 import * as _ from 'lodash';
 
@@ -86,35 +86,40 @@ export abstract class Loadable<U = any, V = any> extends DestroyableContainer {
     public get started(): Observable<V> {
         return this.events.pipe(
             filter(item => item.type === LoadableEvent.STARTED),
-            map(item => item.data as V)
+            map(item => item.data as V),
+            takeUntil(this.destroyed)
         );
     }
 
     public get completed(): Observable<V> {
         return this.events.pipe(
             filter(item => item.type === LoadableEvent.COMPLETE),
-            map(item => item.data as V)
+            map(item => item.data as V),
+            takeUntil(this.destroyed)
         );
     }
 
     public get errored(): Observable<ExtendedError> {
         return this.events.pipe(
             filter(item => item.type === LoadableEvent.ERROR),
-            map(item => item.error)
+            map(item => item.error),
+            takeUntil(this.destroyed)
         );
     }
 
     public get finished(): Observable<V> {
         return this.events.pipe(
             filter(item => item.type === LoadableEvent.FINISHED),
-            map(item => item.data as V)
+            map(item => item.data as V),
+            takeUntil(this.destroyed)
         );
     }
 
     public get statusChanged(): Observable<ILoadableStatusChangeData> {
         return this.events.pipe(
             filter(item => item.type === LoadableEvent.STATUS_CHANGED),
-            map(item => item.data as any)
+            map(item => item.data as any),
+            takeUntil(this.destroyed)
         );
     }
 

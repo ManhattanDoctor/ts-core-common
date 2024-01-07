@@ -14,8 +14,6 @@ export abstract class PaginableBookmarkDataSourceMapCollection<U, V, T = any> ex
     protected _pageSize: number = 10;
     protected _pageBookmark: string;
 
-    public isClearAfterLoad: boolean = false;
-
     // --------------------------------------------------------------------------
     //
     // 	Public Methods

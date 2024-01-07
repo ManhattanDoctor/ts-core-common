@@ -147,6 +147,17 @@ export abstract class Transport<S extends ITransportSettings = ITransportSetting
         return item.asObservable();
     }
 
+    public unlisten<U>(name: string): Observable<U> {
+        if (!this.listeners.has(name)) {
+            throw new ExtendedError(`Command "${name}" is not listening`);
+        }
+        let item = this.listeners.get(name);
+        this.listeners.delete(name);
+
+        this.logUnlisten(name);
+        return item.asObservable();
+    }
+
     // --------------------------------------------------------------------------
     //
     //  Public Methods
@@ -279,6 +290,10 @@ export abstract class Transport<S extends ITransportSettings = ITransportSetting
 
     protected logListen(name: string): void {
         this.debug(`Start listening "${name}" command`);
+    }
+
+    protected logUnlisten(name: string): void {
+        this.debug(`Stop listening "${name}" command`);
     }
 
     protected logEvent<T>(event: ITransportEvent<T>, type: TransportLogType): void {
