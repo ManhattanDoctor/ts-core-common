@@ -22,7 +22,6 @@ export abstract class PaginableDataSourceMapCollection<U, V = any, T = any> exte
     //
     // --------------------------------------------------------------------------
 
-
     public async pageNext(isLoop: boolean): Promise<boolean> {
         if (this.isLastPage && !isLoop) {
             return false;
@@ -52,7 +51,6 @@ export abstract class PaginableDataSourceMapCollection<U, V = any, T = any> exte
             return;
         }
         super.destroy();
-
         this._pageSize = null;
         this._pageIndex = null;
     }
@@ -148,5 +146,4 @@ export abstract class PaginableDataSourceMapCollection<U, V = any, T = any> exte
     public get isFistPage(): boolean {
         return this.pageIndex === 0;
     }
-
 }

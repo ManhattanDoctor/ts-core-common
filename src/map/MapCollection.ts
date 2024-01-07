@@ -162,7 +162,7 @@ export class MapCollection<U> extends Destroyable {
         return value;
     }
 
-    public trackBy(index: number, item: U): string | number {
+    public trackBy = (index: number, item: U): string | number => {
         return this.getUidValue(item);
     }
 
