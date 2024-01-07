@@ -162,13 +162,8 @@ export class MapCollection<U> extends Destroyable {
         return value;
     }
 
-    public trackByFn(index: number, item: U): string | number {
-        try {
-            let uid = this.getUidValue(item);
-            return !_.isNil(uid) ? uid : index;
-        } catch (error) {
-            return index;
-        }
+    public trackBy(index: number, item: U): string | number {
+        return this.getUidValue(item);
     }
 
     // --------------------------------------------------------------------------
