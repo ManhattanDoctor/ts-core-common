@@ -78,7 +78,7 @@ export abstract class FilterableDataSourceMapCollection<U, V = any, T = any> ext
     protected createSortExtrasForRequest(sort: FilterableSort<T>): FilterableSort<T> {
         return this.createSortForRequest(sort);
     }
-    
+
     protected createConditionsExtrasForRequest(conditions: FilterableConditions<T>): FilterableConditions<T> {
         return this.createConditionsForRequest(conditions);
     }
@@ -88,12 +88,15 @@ export abstract class FilterableDataSourceMapCollection<U, V = any, T = any> ext
         this.clear();
     }
 
-
     // --------------------------------------------------------------------------
     //
     // 	Public Methods
     //
     // --------------------------------------------------------------------------
+
+    public getSortByName(name: string): FilterableSort<U | T> {
+        return this.sort;
+    }
 
     public conditionsSortClear(isReloadAfter: boolean = true): void {
         ObjectUtil.clear(this.sort);
@@ -110,15 +113,16 @@ export abstract class FilterableDataSourceMapCollection<U, V = any, T = any> ext
             this.reload();
         }
     }
-    
+
     public destroy(): void {
         if (this.isDestroyed) {
             return;
         }
         super.destroy();
-
         this._sort = null;
+        this._sortExtras = null;
         this._conditions = null;
+        this._conditionsExtras = null;
     }
 
     // --------------------------------------------------------------------------

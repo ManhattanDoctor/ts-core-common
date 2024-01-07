@@ -1,4 +1,4 @@
-import { Observable, Subject, Subscription, filter, map, takeUntil } from 'rxjs';
+import { Observable, Subject, Subscription, filter, map } from 'rxjs';
 import { ExtendedError } from '../../error/ExtendedError';
 import { LoadableEvent } from '../../Loadable';
 import { ObservableData } from '../../observer/ObservableData';
@@ -179,48 +179,42 @@ export abstract class DataSourceMapCollection<U, V = any> extends DestroyableMap
     public get started(): Observable<void> {
         return this.events.pipe(
             filter(item => item.type === LoadableEvent.STARTED),
-            map(() => null),
-            takeUntil(this.destroyed)
+            map(() => null)
         );
     }
 
     public get completed(): Observable<V> {
         return this.events.pipe(
             filter(item => item.type === LoadableEvent.COMPLETE),
-            map(item => item.data as V),
-            takeUntil(this.destroyed)
+            map(item => item.data as V)
         );
     }
 
     public get errored(): Observable<ExtendedError> {
         return this.events.pipe(
             filter(item => item.type === LoadableEvent.ERROR),
-            map(item => item.error),
-            takeUntil(this.destroyed)
+            map(item => item.error)
         );
     }
 
     public get finished(): Observable<void> {
         return this.events.pipe(
             filter(item => item.type === LoadableEvent.FINISHED),
-            map(() => null),
-            takeUntil(this.destroyed)
+            map(() => null)
         );
     }
 
     public get mapLengthChanged(): Observable<number> {
         return this.events.pipe(
             filter(item => item.type === DataSourceMapCollectionEvent.MAP_LENGTH_CHANGED),
-            map(item => Number(item.data)),
-            takeUntil(this.destroyed)
+            map(item => Number(item.data))
         );
     }
 
     public get dataLoadedAndParsed(): Observable<Array<U>> {
         return this.events.pipe(
             filter(item => item.type === DataSourceMapCollectionEvent.DATA_LOADED_AND_PARSED),
-            map(item => item.data as Array<U>),
-            takeUntil(this.destroyed)
+            map(item => item.data as Array<U>)
         );
     }
 

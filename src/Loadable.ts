@@ -86,40 +86,35 @@ export abstract class Loadable<U = any, V = any> extends DestroyableContainer {
     public get started(): Observable<V> {
         return this.events.pipe(
             filter(item => item.type === LoadableEvent.STARTED),
-            map(item => item.data as V),
-            takeUntil(this.destroyed)
+            map(item => item.data as V)
         );
     }
 
     public get completed(): Observable<V> {
         return this.events.pipe(
             filter(item => item.type === LoadableEvent.COMPLETE),
-            map(item => item.data as V),
-            takeUntil(this.destroyed)
+            map(item => item.data as V)
         );
     }
 
     public get errored(): Observable<ExtendedError> {
         return this.events.pipe(
             filter(item => item.type === LoadableEvent.ERROR),
-            map(item => item.error),
-            takeUntil(this.destroyed)
+            map(item => item.error)
         );
     }
 
     public get finished(): Observable<V> {
         return this.events.pipe(
             filter(item => item.type === LoadableEvent.FINISHED),
-            map(item => item.data as V),
-            takeUntil(this.destroyed)
+            map(item => item.data as V)
         );
     }
 
     public get statusChanged(): Observable<ILoadableStatusChangeData> {
         return this.events.pipe(
             filter(item => item.type === LoadableEvent.STATUS_CHANGED),
-            map(item => item.data as any),
-            takeUntil(this.destroyed)
+            map(item => item.data as ILoadableStatusChangeData)
         );
     }
 

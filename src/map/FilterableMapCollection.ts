@@ -84,7 +84,6 @@ export class FilterableMapCollection<U> extends DestroyableMapCollection<U> {
             return;
         }
         super.destroy();
-
         this._filtered = null;
     }
 
