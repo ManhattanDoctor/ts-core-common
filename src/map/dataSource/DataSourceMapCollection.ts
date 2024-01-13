@@ -20,7 +20,7 @@ export abstract class DataSourceMapCollection<U, V = any> extends DestroyableMap
     protected reloadHandler: () => void;
     protected isReloadRequest: boolean = false;
 
-    protected observer: Subject<ObservableData<LoadableEvent | DataSourceMapCollectionEvent, number | V | Array<U>>>;
+    protected observer: Subject<ObservableData<LoadableEvent | DataSourceMapCollectionEvent, number | V | U | Array<U>>>;
     protected subscription: Subscription;
 
     // --------------------------------------------------------------------------
@@ -142,6 +142,22 @@ export abstract class DataSourceMapCollection<U, V = any> extends DestroyableMap
         this.observer.next(new ObservableData(LoadableEvent.FINISHED));
     }
 
+    public update(uid: string, data: Partial<U>): U {
+        let item = super.update(uid, data);
+        if (!_.isNil(item)) {
+            this.observer.next(new ObservableData(DataSourceMapCollectionEvent.ITEM_CHANGED, item));
+        }
+        return item;
+    }
+
+    public replace(item: U): U {
+        let existItem = super.replace(item);
+        if (!_.isNil(item)) {
+            this.observer.next(new ObservableData(DataSourceMapCollectionEvent.ITEM_REPLACED, existItem));
+        }
+        return existItem;
+    }
+
     public reset(): void {
         this._isDirty = false;
         this._isLoading = false;
@@ -172,7 +188,7 @@ export abstract class DataSourceMapCollection<U, V = any> extends DestroyableMap
     //
     // --------------------------------------------------------------------------
 
-    public get events(): Observable<ObservableData<LoadableEvent | DataSourceMapCollectionEvent, V | number | Array<U>>> {
+    public get events(): Observable<ObservableData<LoadableEvent | DataSourceMapCollectionEvent, V | number | U | Array<U>>> {
         return this.observer.asObservable();
     }
 
@@ -201,6 +217,20 @@ export abstract class DataSourceMapCollection<U, V = any> extends DestroyableMap
         return this.events.pipe(
             filter(item => item.type === LoadableEvent.FINISHED),
             map(() => null)
+        );
+    }
+
+    public get itemChanged(): Observable<U> {
+        return this.events.pipe(
+            filter(item => item.type === DataSourceMapCollectionEvent.ITEM_CHANGED),
+            map(item => item.data as U)
+        );
+    }
+
+    public get itemReplaced(): Observable<U> {
+        return this.events.pipe(
+            filter(item => item.type === DataSourceMapCollectionEvent.ITEM_REPLACED),
+            map(item => item.data as U)
         );
     }
 
@@ -242,6 +272,8 @@ export abstract class DataSourceMapCollection<U, V = any> extends DestroyableMap
 }
 
 export enum DataSourceMapCollectionEvent {
+    ITEM_CHANGED = 'ITEM_CHANGED',
+    ITEM_REPLACED = 'ITEM_REPLACED',
     MAP_LENGTH_CHANGED = 'MAP_LENGTH_CHANGED',
     DATA_LOADED_AND_PARSED = 'DATA_LOADED_AND_PARSED'
 }

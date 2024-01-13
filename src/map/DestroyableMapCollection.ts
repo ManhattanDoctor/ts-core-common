@@ -1,5 +1,6 @@
 import { IDestroyable } from '../IDestroyable';
 import { MapCollection } from './MapCollection';
+import * as _ from 'lodash';
 
 export class DestroyableMapCollection<U> extends MapCollection<U> {
     // --------------------------------------------------------------------------
@@ -28,5 +29,9 @@ export class DestroyableMapCollection<U> extends MapCollection<U> {
 
     public remove(key: string): U {
         return this.destroyItem(super.remove(key));
+    }
+
+    public replace(item: U): U {
+        return this.destroyItem(super.replace(item));
     }
 }

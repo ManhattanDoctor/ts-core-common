@@ -2,6 +2,7 @@ import * as _ from 'lodash';
 import { Destroyable } from '../Destroyable';
 import { ExtendedError } from '../error';
 import { ArrayUtil, ObjectUtil } from '../util';
+import { IDestroyable } from '../IDestroyable';
 
 export class MapCollection<U> extends Destroyable {
     // --------------------------------------------------------------------------
@@ -47,29 +48,15 @@ export class MapCollection<U> extends Destroyable {
     // --------------------------------------------------------------------------
 
     public add(item: U, isFirst: boolean = false): U {
-        if (_.isNil(item) || !ObjectUtil.hasOwnProperty(item, this.uidPropertyName)) {
-            return null;
-        }
-
         let uid = this.getUidValue(item);
-        if (!_.isString(uid)) {
-            if (_.isNumber(uid)) {
-                uid = parseFloat(uid).toString();
-            } else {
-                throw new ExtendedError(`Uid must be a string: "${uid}" is ${typeof uid}`);
-            }
-        }
-
         if (this.has(uid)) {
             return null;
         }
-
         if (isFirst) {
             this._collection.unshift(item);
         } else {
             this._collection.push(item);
         }
-
         this.map.set(uid, item);
         this.setLength(this._collection.length);
         this.checkMaxLength();
@@ -107,8 +94,40 @@ export class MapCollection<U> extends Destroyable {
         return index !== -1 ? index : null;
     }
 
+    public getIndexByUid(uid: string, fromIndex?: number): number {
+        if (_.isEmpty(this._collection)) {
+            return null;
+        }
+        let item = this.get(uid);
+        return !_.isNil(item) ? this.getIndex(item, fromIndex) : null;
+    }
+
     public has(uid: string): boolean {
         return !_.isNil(uid) ? this.map.has(uid) : null;
+    }
+
+    public update(uid: string, data: Partial<U>): U {
+        let item = this.get(uid);
+        if (_.isNil(item)) {
+            return null;
+        }
+        ObjectUtil.copyPartial(data, item);
+        return item;
+    }
+
+    public replace(item: U): U {
+        let uid = this.getUidValue(item);
+        if (_.isNil(uid)) {
+            return null;
+        }
+        let index = this.getIndexByUid(uid);
+        if (_.isNil(index)) {
+            return null;
+        }
+        let existItem = this.collection[index];
+        this.map.set(uid, item);
+        this._collection[index] = item;
+        return existItem;
     }
 
     public clear() {
@@ -173,7 +192,13 @@ export class MapCollection<U> extends Destroyable {
     // --------------------------------------------------------------------------
 
     protected getUidValue(item: U): string {
+        if (_.isNil(item)) {
+            return null;
+        }
         let value = item[this.uidPropertyName];
+        if (!_.isString(value) && !_.isNumber(value)) {
+            throw new ExtendedError(`Uid must be a string: "${value}" is ${typeof value}`);
+        }
         return !_.isNil(value) ? value.toString() : null;
     }
 
