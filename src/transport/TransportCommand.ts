@@ -30,7 +30,7 @@ export class TransportCommand<T> implements ITransportCommand<T> {
     constructor(name: string, request?: T, id?: string) {
         this.id = !_.isNil(id) ? id : uuid();
         this.name = name;
-        this.request = this.validateRequest(request || ({} as any));
+        this.request = this.validateRequest(!_.isNil(request) ? request : {} as T);
     }
 
     // --------------------------------------------------------------------------

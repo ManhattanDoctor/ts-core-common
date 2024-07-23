@@ -73,13 +73,14 @@ export class TransportHttp<S extends ITransportHttpSettings = ITransportHttpSett
         }
 
         let request = command.request as ITransportHttpRequest;
-        request.timeout = options.timeout;
-
         if (_.isNil(request.url)) {
             request.url = command.name;
         }
         if (_.isNil(request.method)) {
             request.method = this.settings.method;
+        }
+        if (_.isNil(request.timeout)) {
+            request.timeout = options.timeout;
         }
         if (_.isNil(request.isHandleError) && this.settings.isHandleError) {
             request.isHandleError = this.settings.isHandleError;

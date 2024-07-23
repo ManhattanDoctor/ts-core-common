@@ -19,7 +19,9 @@ export class CloneUtil {
         let val, src, clone;
 
         args.forEach(obj => {
-            if (typeof obj !== 'object' || obj === null || Array.isArray(obj)) return;
+            if (typeof obj !== 'object' || obj === null || Array.isArray(obj)) {
+                return;
+            }
 
             Object.keys(obj).forEach(key => {
                 src = CloneUtil.safeGetProperty(target, key); // source value

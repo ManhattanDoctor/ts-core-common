@@ -4,6 +4,7 @@ import { LoadableEvent } from '../../Loadable';
 import { ObservableData } from '../../observer/ObservableData';
 import { DestroyableMapCollection } from '../DestroyableMapCollection';
 import * as _ from 'lodash';
+import { MapCollectionUid } from '../MapCollection';
 
 export abstract class DataSourceMapCollection<U, V = any> extends DestroyableMapCollection<U> {
     // --------------------------------------------------------------------------
@@ -142,7 +143,7 @@ export abstract class DataSourceMapCollection<U, V = any> extends DestroyableMap
         this.observer.next(new ObservableData(LoadableEvent.FINISHED));
     }
 
-    public update(uid: string, data: Partial<U>): U {
+    public update(uid: MapCollectionUid, data: Partial<U>): U {
         let item = super.update(uid, data);
         if (!_.isNil(item)) {
             this.observer.next(new ObservableData(DataSourceMapCollectionEvent.ITEM_CHANGED, item));

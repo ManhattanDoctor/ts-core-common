@@ -2,7 +2,6 @@ import * as _ from 'lodash';
 import { Destroyable } from '../Destroyable';
 import { ExtendedError } from '../error';
 import { ArrayUtil, ObjectUtil } from '../util';
-import { IDestroyable } from '../IDestroyable';
 
 export class MapCollection<U> extends Destroyable {
     // --------------------------------------------------------------------------
@@ -11,7 +10,7 @@ export class MapCollection<U> extends Destroyable {
     //
     // --------------------------------------------------------------------------
 
-    protected map: Map<string, U>;
+    protected map: Map<MapCollectionUid, U>;
     protected uidPropertyName: keyof U;
 
     protected _length: number;
@@ -70,8 +69,8 @@ export class MapCollection<U> extends Destroyable {
         return _.compact(items.map(item => this.add(item)));
     }
 
-    public get(uid: string): U {
-        return !_.isNil(uid) ? this.map.get(uid) : null;
+    public get(uid: MapCollectionUid): U {
+        return !_.isNil(uid) ? this.map.get(uid.toString()) : null;
     }
 
     public getByIndex(index: number): U {
@@ -94,7 +93,7 @@ export class MapCollection<U> extends Destroyable {
         return index !== -1 ? index : null;
     }
 
-    public getIndexByUid(uid: string, fromIndex?: number): number {
+    public getIndexByUid(uid: MapCollectionUid, fromIndex?: number): number {
         if (_.isEmpty(this._collection)) {
             return null;
         }
@@ -102,11 +101,11 @@ export class MapCollection<U> extends Destroyable {
         return !_.isNil(item) ? this.getIndex(item, fromIndex) : null;
     }
 
-    public has(uid: string): boolean {
-        return !_.isNil(uid) ? this.map.has(uid) : null;
+    public has(uid: MapCollectionUid): boolean {
+        return !_.isNil(uid) ? this.map.has(uid.toString()) : null;
     }
 
-    public update(uid: string, data: Partial<U>): U {
+    public update(uid: MapCollectionUid, data: Partial<U>): U {
         let item = this.get(uid);
         if (_.isNil(item)) {
             return null;
@@ -147,7 +146,7 @@ export class MapCollection<U> extends Destroyable {
         this._collection = null;
     }
 
-    public remove(uid: string): U {
+    public remove(uid: MapCollectionUid): U {
         if (!this.has(uid)) {
             return null;
         }
@@ -155,7 +154,7 @@ export class MapCollection<U> extends Destroyable {
         if (ArrayUtil.remove(this._collection, item)) {
             this.setLength(this._collection.length);
         }
-        this.map.delete(uid);
+        this.map.delete(uid.toString());
         return item;
     }
 
@@ -167,7 +166,7 @@ export class MapCollection<U> extends Destroyable {
         ArrayUtil.move(this._collection, oldIndex, newIndex);
     }
 
-    public keys(): Array<string> {
+    public keys(): Array<MapCollectionUid> {
         return Array.from(this.map.keys());
     }
 
@@ -197,7 +196,7 @@ export class MapCollection<U> extends Destroyable {
         }
         let value = item[this.uidPropertyName];
         if (!_.isString(value) && !_.isNumber(value)) {
-            throw new ExtendedError(`Uid must be a string: "${value}" is ${typeof value}`);
+            throw new ExtendedError(`Uid must be a string or number: but "${value}" is ${typeof value}`);
         }
         return !_.isNil(value) ? value.toString() : null;
     }
@@ -259,3 +258,5 @@ export class MapCollection<U> extends Destroyable {
         return this._collection;
     }
 }
+
+export type MapCollectionUid = string | number;
