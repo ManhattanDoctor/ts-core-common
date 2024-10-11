@@ -13,7 +13,7 @@ export let FilterableConditionRegExp = /[<=>]/g;
 
 export enum FilterableConditionType {
     EQUAL = 'EQUAL',
-    
+
     MORE = 'MORE',
     MORE_OR_EQUAL = 'MORE_OR_EQUAL',
 
@@ -58,7 +58,7 @@ export interface IFilterableCondition<T = any> {
     value: IFilterableConditionValue<T>;
 }
 
-export type IFilterableConditionValue<T = any, P extends keyof T = any> = T[P] | number | string;
+export type IFilterableConditionValue<T = any, P extends keyof T = any> = T[P] | number | string | Array<string | number>;
 
 // --------------------------------------------------------------------------
 //
@@ -136,15 +136,18 @@ export const ToFilterableCondition = <T>(value: string, type: FilterableDataType
     };
 };
 
-export const GetFilterableCondition = (value: string): string => {
+export const GetFilterableCondition = <T>(value: T): string => {
     if (_.isNil(value)) {
         return null;
     }
-    let array = value.trim().match(FilterableConditionRegExp);
-    return !_.isEmpty(array) ? array[0] : null;
+    if (_.isString(value)) {
+        let array = value.trim().match(FilterableConditionRegExp);
+        return !_.isEmpty(array) ? array[0] : null;
+    }
+    return null;
 };
 
-export const GetFilterableConditionType = (value: string, defaultCondition: FilterableConditionType): FilterableConditionType => {
+export const GetFilterableConditionType = <T>(value: T, defaultCondition: FilterableConditionType): FilterableConditionType => {
     if (_.isNil(value)) {
         return defaultCondition;
     }
@@ -174,7 +177,7 @@ export const ParseFilterableCondition = <T, P extends keyof T>(
     name: P,
     type: FilterableDataType,
     defaultCondition: FilterableConditionType = FilterableConditionType.EQUAL,
-    transform?: (value: T[P], conditions: FilterableConditions<T>, name: P) => string
+    transform?: (value: T[P] | IFilterableCondition<T>, conditions: FilterableConditions<T>, name: P) => string
 ): void => {
     ParseFilterableConditionExtra(conditions, name as string, type, defaultCondition, transform as any);
 };
@@ -190,9 +193,14 @@ export const ParseFilterableConditionExtra = (
         return;
     }
 
-    let value: any = conditions[name];
+    let value = conditions[name];
     if (!_.isNil(value)) {
-        value = !_.isNil(transform) ? transform(value, conditions, name) : value.toString();
+        if (!_.isNil(transform)) {
+            value = transform(value, conditions, name);
+        }
+        else if (!_.isArray(value)) {
+            value = value.toString();
+        }
     }
 
     let item = ToFilterableCondition(value, type, defaultCondition);

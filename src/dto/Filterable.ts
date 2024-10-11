@@ -52,7 +52,7 @@ export class Filterable<U, V = any> implements IFilterable<U, V> {
         return value;
     }
 
-    public static isValueInvalid(value: any): boolean {
+    public static isValueInvalid<T>(value: T): boolean {
         if (_.isBoolean(value) || _.isNull(value)) {
             return false;
         }
