@@ -1,7 +1,7 @@
 import { ITraceable } from '../trace';
 import { ObjectUtil } from '../util';
-import * as _ from 'lodash';
 import { Filterable } from './Filterable';
+import * as _ from 'lodash';
 
 // --------------------------------------------------------------------------
 //
@@ -44,18 +44,20 @@ export enum FilterableDataType {
 //
 // --------------------------------------------------------------------------
 
-export interface IFilterable<U, V = any> extends ITraceable {
-    sort?: FilterableSort<U>;
-    conditions?: FilterableConditions<U>;
+export interface IFilterableProperties<T> {
+    sort?: FilterableSort<T>;
+    conditions?: FilterableConditions<T>;
+}
 
+export interface IFilterable<U, V = any> extends IFilterableProperties<U>, ITraceable {
     sortExtras?: FilterableSort<V>;
     conditionsExtras?: FilterableConditions<V>;
 }
 
 export interface IFilterableCondition<T = any> {
-    condition: FilterableConditionType;
     type?: FilterableDataType;
     value: IFilterableConditionValue<T>;
+    condition: FilterableConditionType;
 }
 
 export type IFilterableConditionValue<T = any, P extends keyof T = any> = T[P] | number | string | Array<string | number>;
