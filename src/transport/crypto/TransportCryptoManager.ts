@@ -1,4 +1,5 @@
 import { IKeyAsymmetric, ISignature } from "../../crypto";
+import { ObjectUtil, TransformUtil } from "../../util";
 import { ITransportCommand } from "../ITransport";
 import { ITransportCryptoManager } from "./ITransportCryptoManager";
 import * as _ from 'lodash';
@@ -14,16 +15,21 @@ export abstract class TransportCryptoManager implements ITransportCryptoManager 
         if (_.isNil(nonce)) {
             nonce = Date.now().toString();
         }
-        return {
-            value: await manager.sign(command, nonce, key.privateKey),
-            publicKey: key.publicKey,
-            algorithm: manager.algorithm,
-            nonce
-        }
+        let { publicKey, privateKey } = key;
+        return { value: await manager.sign(command, nonce, privateKey), algorithm: manager.algorithm, publicKey, nonce };
     }
 
     public static async verify<U>(command: ITransportCommand<U>, manager: ITransportCryptoManager, signature: ISignature): Promise<boolean> {
         return manager.verify(command, signature);
+    }
+
+    public static toSign<U>(command: ITransportCommand<U>, nonce: string): string {
+        let { name, request } = command;
+        if (_.isNil(request)) {
+            return `${name}_${nonce}`;
+        }
+        let value = _.isObject(request) ? TransformUtil.fromJSON(ObjectUtil.sortKeys(request, true)) : request.toString();
+        return `${name}_${value}_${nonce}`;
     }
 
     // --------------------------------------------------------------------------
@@ -44,13 +50,7 @@ export abstract class TransportCryptoManager implements ITransportCryptoManager 
     //
     // --------------------------------------------------------------------------
 
-    protected toString<U>(command: ITransportCommand<U>, nonce: string): string {
-        let request = !_.isNil(command.request) ? this.toStringRequest(command.request) : '';
-        return `${command.name}${request}${nonce}`;
-    }
-
-    protected toStringRequest<U>(item: U): string {
-        return item.toString();
-        // return _.isObject(item) ? TransformUtil.fromJSON(ObjectUtil.sortKeys(item, true)) : item.toString();
+    protected toSign<U>(command: ITransportCommand<U>, nonce: string): string {
+        return TransportCryptoManager.toSign(command, nonce);
     }
 }

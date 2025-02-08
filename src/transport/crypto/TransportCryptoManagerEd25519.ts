@@ -19,11 +19,11 @@ export class TransportCryptoManagerEd25519 extends TransportCryptoManager {
     // --------------------------------------------------------------------------
 
     public async sign<U>(command: ITransportCommand<U>, nonce: string, privateKey: string): Promise<string> {
-        return Ed25519.sign(this.toString(command, nonce), privateKey);
+        return Ed25519.sign(this.toSign(command, nonce), privateKey);
     }
 
     public async verify<U>(command: ITransportCommand<U>, signature: ISignature): Promise<boolean> {
-        return Ed25519.verify(this.toString(command, signature.nonce), signature.value, signature.publicKey);
+        return Ed25519.verify(this.toSign(command, signature.nonce), signature.value, signature.publicKey);
     }
 
     // --------------------------------------------------------------------------
