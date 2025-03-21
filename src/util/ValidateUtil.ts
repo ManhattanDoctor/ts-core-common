@@ -48,7 +48,6 @@ export class ValidateUtil {
         if (!_.isArray(items) || _.isEmpty(items)) {
             return `Validation failed`;
         }
-
         let value = ``;
         for (let item of items) {
             if (!_.isNil(item)) {

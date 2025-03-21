@@ -1,5 +1,3 @@
-import axios from 'axios';
-import * as _ from 'lodash';
 import { ITransportHttpSettings } from './ITransportHttpSettings';
 import { ExtendedError, isAxiosError, parseAxiosError } from '../../error';
 import { ITransportCommand, ITransportCommandAsync, ITransportCommandOptions, ITransportEvent } from '../ITransport';
@@ -8,6 +6,8 @@ import { TransportImpl } from '../TransportImpl';
 import { TransportHttpCommandAsync } from './TransportHttpCommandAsync';
 import { TransportLogType } from '../TransportLogUtil';
 import { ITransportCommandRequest } from '../Transport';
+import axios from 'axios';
+import * as _ from 'lodash';
 
 export class TransportHttp<S extends ITransportHttpSettings = ITransportHttpSettings, O extends ITransportCommandOptions = ITransportCommandOptions> extends TransportImpl<S, O> {
     // --------------------------------------------------------------------------
