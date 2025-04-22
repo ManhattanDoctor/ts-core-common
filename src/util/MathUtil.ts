@@ -85,7 +85,7 @@ export class MathUtil {
         return MathUtil.toString(MathUtil.new(value).pow(MathUtil.new(n)));
     }
 
-    public modulo(first: string, second: string): string {
+    public static modulo(first: string, second: string): string {
         if (MathUtil.isInvalid(first) || MathUtil.isInvalid(second)) {
             return null;
         }
