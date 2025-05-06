@@ -93,7 +93,7 @@ export abstract class TransportImpl<S extends ITransportSettings = ITransportSet
         if (!this.isCommandAsync(command) || !isNeedReply) {
             return;
         }
-        this.commandTimeout(command, options);
+        this.commandTimeoutAdd(command, options);
         this.observer.next(new ObservableData(LoadableEvent.STARTED, command));
     }
 

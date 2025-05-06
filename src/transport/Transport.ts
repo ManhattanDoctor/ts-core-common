@@ -1,4 +1,3 @@
-import * as _ from 'lodash';
 import { Observable, Subject } from 'rxjs';
 import { ExtendedError } from '../error';
 import { LoadableEvent } from '../Loadable';
@@ -10,6 +9,7 @@ import { TransportTimeoutError } from './error';
 import { ITransportSettings } from './ITransportSettings';
 import { ITransport, ITransportCommand, ITransportCommandAsync, ITransportCommandOptions, ITransportEvent, TransportCommandWaitDelay } from './ITransport';
 import { TransportLogCommandLogFilter, TransportLogEventFilter, TransportLogType, TransportLogUtil } from './TransportLogUtil';
+import * as _ from 'lodash';
 
 export abstract class Transport<S extends ITransportSettings = ITransportSettings, O extends ITransportCommandOptions = ITransportCommandOptions, R extends ITransportCommandRequest = ITransportCommandRequest> extends LoggerWrapper implements ITransport {
     // --------------------------------------------------------------------------
@@ -72,6 +72,7 @@ export abstract class Transport<S extends ITransportSettings = ITransportSetting
     //
     // --------------------------------------------------------------------------
 
+    protected timeouts: Map<string, ReturnType<typeof setTimeout>>;
     protected requests: Map<string, R>;
     protected promises: Map<string, ITransportCommandPromise<any, any, O>>;
     protected listeners: Map<string, Subject<any>>;
@@ -100,6 +101,7 @@ export abstract class Transport<S extends ITransportSettings = ITransportSetting
 
         this.requests = new Map();
         this.promises = new Map();
+        this.timeouts = new Map();
         this.listeners = new Map();
         this.dispatchers = new Map();
     }
@@ -170,6 +172,12 @@ export abstract class Transport<S extends ITransportSettings = ITransportSetting
         }
         super.destroy();
 
+        if (!_.isNil(this.timeouts)) {
+            this.timeouts.forEach(item => clearTimeout(item));
+            this.timeouts.clear();
+            this.timeouts = null;
+        }
+
         if (!_.isNil(this.requests)) {
             this.requests.clear();
             this.requests = null;
@@ -204,11 +212,38 @@ export abstract class Transport<S extends ITransportSettings = ITransportSetting
 
     // --------------------------------------------------------------------------
     //
+    //  Timeout Methods
+    //
+    // --------------------------------------------------------------------------
+
+    protected async commandTimeoutAdd<U, V>(command: ITransportCommandAsync<U, V>, options: O): Promise<void> {
+        let delay = this.getCommandTimeoutDelay(command, options);
+        let timeout = setTimeout(() => {
+            command.response(new TransportTimeoutError(command));
+            this.logCommand(command, TransportLogType.RESPONSE_TIMEOUT);
+            this.commandProcessed(command);
+        }, delay);
+        this.timeouts.set(command.id, timeout);
+    }
+
+    protected async commandTimeoutRemove<U, V>(command: ITransportCommandAsync<U, V>): Promise<void> {
+        let timeout = this.timeouts.get(command.id);
+        if (_.isNil(timeout)) {
+            return;
+        }
+        this.timeouts.delete(command.id);
+        clearTimeout(timeout);
+    }
+
+    // --------------------------------------------------------------------------
+    //
     //  Help Methods
     //
     // --------------------------------------------------------------------------
 
     protected commandProcessed<U, V>(command: ITransportCommandAsync<U, V>): void {
+        this.commandTimeoutRemove(command);
+
         let promise = this.promises.get(command.id);
         if (_.isNil(promise)) {
             return;
@@ -222,16 +257,6 @@ export abstract class Transport<S extends ITransportSettings = ITransportSetting
             this.observer.next(new ObservableData(LoadableEvent.COMPLETE, command));
         }
         this.observer.next(new ObservableData(LoadableEvent.FINISHED, command));
-    }
-
-    protected async commandTimeout<U, V>(command: ITransportCommandAsync<U, V>, options: O): Promise<void> {
-        await PromiseHandler.delay(this.getCommandTimeoutDelay(command, options));
-        if (_.isNil(this.promises) || !this.promises.has(command.id)) {
-            return;
-        }
-        command.response(new TransportTimeoutError(command));
-        this.logCommand(command, TransportLogType.RESPONSE_TIMEOUT);
-        this.commandProcessed(command);
     }
 
     protected isCommandAsync<U, V = any>(command: ITransportCommand<U>): command is ITransportCommandAsync<U, V> {

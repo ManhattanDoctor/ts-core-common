@@ -16,8 +16,8 @@ export class PromiseHandler<U = any, V = string> implements IDestroyable {
         return item;
     }
 
-    public static delay(timeout: number): Promise<void> {
-        let promise = PromiseHandler.create();
+    public static delay(timeout: number): Promise<ReturnType<typeof setTimeout>> {
+        let promise = PromiseHandler.create<ReturnType<typeof setTimeout>>();
         let timer = setTimeout(() => {
             clearTimeout(timer);
             promise.resolve();
