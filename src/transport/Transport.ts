@@ -216,7 +216,7 @@ export abstract class Transport<S extends ITransportSettings = ITransportSetting
     //
     // --------------------------------------------------------------------------
 
-    protected async commandTimeoutAdd<U, V>(command: ITransportCommandAsync<U, V>, options: O): Promise<void> {
+    protected commandTimeoutAdd<U, V>(command: ITransportCommandAsync<U, V>, options: O): void {
         let delay = this.getCommandTimeoutDelay(command, options);
         let timeout = setTimeout(() => {
             command.response(new TransportTimeoutError(command));
@@ -226,7 +226,7 @@ export abstract class Transport<S extends ITransportSettings = ITransportSetting
         this.timeouts.set(command.id, timeout);
     }
 
-    protected async commandTimeoutRemove<U, V>(command: ITransportCommandAsync<U, V>): Promise<void> {
+    protected commandTimeoutRemove<U, V>(command: ITransportCommandAsync<U, V>): void {
         let timeout = this.timeouts.get(command.id);
         if (_.isNil(timeout)) {
             return;
