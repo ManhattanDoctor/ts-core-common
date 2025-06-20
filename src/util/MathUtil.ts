@@ -120,8 +120,50 @@ export class MathUtil {
         return MathUtil.new(value).toHex();
     }
 
+    public static toFixed(value: Decimal.Value, decimals?: number): string {
+        if (MathUtil.isInvalid(value)) {
+            return null;
+        }
+        return MathUtil.new(value).toFixed(decimals);
+    }
+
     public static isInvalid(value: Decimal.Value): boolean {
         return _.isNil(value);
+    }
+
+    public static isInteger(value: Decimal.Value): boolean {
+        if (MathUtil.isInvalid(value)) {
+            return false;
+        }
+        return MathUtil.new(value).isInteger();
+    }
+
+    public static isPositive(value: Decimal.Value): boolean {
+        if (MathUtil.isInvalid(value)) {
+            return false;
+        }
+        return MathUtil.new(value).isPositive();
+    }
+
+    public static isNegative(value: Decimal.Value): boolean {
+        if (MathUtil.isInvalid(value)) {
+            return false;
+        }
+        return MathUtil.new(value).isNegative();
+    }
+
+    public static isZero(value: Decimal.Value): boolean {
+        if (MathUtil.isInvalid(value)) {
+            return false;
+        }
+        return MathUtil.new(value).isZero();
+    }
+
+    public static isFinite(value: Decimal.Value): boolean {
+        if (MathUtil.isInvalid(value)) {
+            return false;
+        }
+        return MathUtil.new(value).isFinite();
     }
 
     // --------------------------------------------------------------------------
