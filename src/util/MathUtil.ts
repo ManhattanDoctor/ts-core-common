@@ -20,7 +20,7 @@ export class MathUtil {
         return Decimal.set(MathUtil.config || { defaults: true });
     }
 
-    public static new(value: Decimal.Value): Decimal {
+    public static new(value: MathValue): Decimal {
         let item = MathUtil.create();
         return new item(value);
     }
@@ -99,67 +99,74 @@ export class MathUtil {
         return MathUtil.toString(MathUtil.new(value).floor());
     }
 
-    public static toString(value: Decimal.Value): string {
+    public static toString(value: MathValue): string {
         if (MathUtil.isInvalid(value)) {
             return null;
         }
         return value.toString();
     }
 
-    public static toNumber(value: Decimal.Value): number {
+    public static toNumber(value: MathValue): number {
         if (MathUtil.isInvalid(value)) {
             return null;
         }
         return MathUtil.new(value).toNumber();
     }
 
-    public static toHex(value: Decimal.Value): string {
+    public static toHex(value: MathValue): string {
         if (MathUtil.isInvalid(value)) {
             return null;
         }
         return MathUtil.new(value).toHex();
     }
 
-    public static toFixed(value: Decimal.Value, decimals?: number): string {
+    public static toFixed(value: MathValue, decimals?: number): string {
         if (MathUtil.isInvalid(value)) {
             return null;
         }
         return MathUtil.new(value).toFixed(decimals);
     }
 
-    public static isInvalid(value: Decimal.Value): boolean {
+    public static isInvalid(value: MathValue): boolean {
         return _.isNil(value);
     }
 
-    public static isInteger(value: Decimal.Value): boolean {
+    public static isInteger(value: MathValue): boolean {
         if (MathUtil.isInvalid(value)) {
             return false;
         }
         return MathUtil.new(value).isInteger();
     }
 
-    public static isPositive(value: Decimal.Value): boolean {
+    public static isPositive(value: MathValue): boolean {
         if (MathUtil.isInvalid(value)) {
             return false;
         }
         return MathUtil.new(value).isPositive();
     }
 
-    public static isNegative(value: Decimal.Value): boolean {
+    public static isNegative(value: MathValue): boolean {
         if (MathUtil.isInvalid(value)) {
             return false;
         }
         return MathUtil.new(value).isNegative();
     }
 
-    public static isZero(value: Decimal.Value): boolean {
+    public static isZero(value: MathValue): boolean {
         if (MathUtil.isInvalid(value)) {
             return false;
         }
         return MathUtil.new(value).isZero();
     }
 
-    public static isFinite(value: Decimal.Value): boolean {
+    public static isNaN(value: MathValue): boolean {
+        if (MathUtil.isInvalid(value)) {
+            return false;
+        }
+        return MathUtil.new(value).isNaN();
+    }
+
+    public static isFinite(value: MathValue): boolean {
         if (MathUtil.isInvalid(value)) {
             return false;
         }
@@ -235,4 +242,5 @@ export class MathUtil {
     }
 }
 
+export type MathValue = Decimal.Value;
 export type MathUtilConfig = Decimal.Config;

@@ -30,6 +30,10 @@ export enum FilterableConditionType {
     INCLUDES_ONE_OF = 'INCLUDES_ONE_OF',
 }
 
+export enum FilterableConditionUnion {
+    OR = 'OR',
+    AND = 'AND',
+}
 export enum FilterableDataType {
     DATE = 'DATE',
     ARRAY = 'ARRAY',
@@ -55,9 +59,11 @@ export interface IFilterable<U, V = any> extends IFilterableProperties<U>, ITrac
 }
 
 export interface IFilterableCondition<T = any> {
-    type?: FilterableDataType;
     value: IFilterableConditionValue<T>;
     condition: FilterableConditionType;
+
+    type?: FilterableDataType;
+    union?: FilterableConditionUnion;
 }
 
 export type IFilterableConditionValue<T = any, P extends keyof T = any> = T[P] | number | string | Array<string | number>;
@@ -105,12 +111,11 @@ export const IsHasFilterableCondition = <T = any, P extends keyof T = any>(
     return false;
 };
 
-export const ToFilterableCondition = <T>(value: string, type: FilterableDataType, defaultCondition: FilterableConditionType): IFilterableCondition<T> => {
+export const ToFilterableCondition = <T>(value: string, type: FilterableDataType, condition: FilterableConditionType, union?: FilterableConditionUnion): IFilterableCondition<T> => {
     if (Filterable.isValueInvalid(value)) {
         return null;
     }
 
-    let condition = defaultCondition;
     if (type === FilterableDataType.STRING) {
         switch (condition) {
             case FilterableConditionType.CONTAINS:
@@ -118,7 +123,7 @@ export const ToFilterableCondition = <T>(value: string, type: FilterableDataType
                 value = `%${value}%`;
                 break;
         }
-        return { value, type, condition };
+        return { value, type, condition, union };
     }
 
     let item: string | number = RemoveFilterableCondition(value);
@@ -133,8 +138,9 @@ export const ToFilterableCondition = <T>(value: string, type: FilterableDataType
 
     return {
         type,
+        union,
         value: item,
-        condition: GetFilterableConditionType(value, defaultCondition)
+        condition: GetFilterableConditionType(value, condition)
     };
 };
 
@@ -149,11 +155,11 @@ export const GetFilterableCondition = <T>(value: T): string => {
     return null;
 };
 
-export const GetFilterableConditionType = <T>(value: T, defaultCondition: FilterableConditionType): FilterableConditionType => {
+export const GetFilterableConditionType = <T>(value: T, condition: FilterableConditionType): FilterableConditionType => {
     if (_.isNil(value)) {
-        return defaultCondition;
+        return condition;
     }
-    let condition = null;
+
     switch (GetFilterableCondition(value)) {
         case '=':
             condition = FilterableConditionType.EQUAL;
@@ -164,8 +170,6 @@ export const GetFilterableConditionType = <T>(value: T, defaultCondition: Filter
         case '<':
             condition = FilterableConditionType.LESS;
             break;
-        default:
-            condition = defaultCondition;
     }
     return condition;
 };
@@ -178,17 +182,19 @@ export const ParseFilterableCondition = <T, P extends keyof T>(
     conditions: FilterableConditions<T>,
     name: P,
     type: FilterableDataType,
-    defaultCondition: FilterableConditionType = FilterableConditionType.EQUAL,
-    transform?: (value: T[P] | IFilterableCondition<T>, conditions: FilterableConditions<T>, name: P) => string
+    condition: FilterableConditionType = FilterableConditionType.EQUAL,
+    union: FilterableConditionUnion = FilterableConditionUnion.AND,
+    transform?: (value: T[P] | IFilterableCondition<T>, conditions: FilterableConditions<T>, name: P) => string,
 ): void => {
-    ParseFilterableConditionExtra(conditions, name as string, type, defaultCondition, transform as any);
+    ParseFilterableConditionExtra(conditions, name as string, type, condition, union, transform as any);
 };
 
 export const ParseFilterableConditionExtra = (
     conditions: any,
     name: string,
     type: FilterableDataType,
-    defaultCondition: FilterableConditionType = FilterableConditionType.EQUAL,
+    condition: FilterableConditionType = FilterableConditionType.EQUAL,
+    union: FilterableConditionUnion = FilterableConditionUnion.AND,
     transform?: (value: any, conditions: any, name: string) => string
 ): void => {
     if (_.isEmpty(conditions) || _.isNil(name) || !ObjectUtil.hasOwnProperty(conditions, name)) {
@@ -205,7 +211,7 @@ export const ParseFilterableConditionExtra = (
         }
     }
 
-    let item = ToFilterableCondition(value, type, defaultCondition);
+    let item = ToFilterableCondition(value, type, condition, union);
     if (!_.isNil(item)) {
         conditions[name] = item;
     } else {
