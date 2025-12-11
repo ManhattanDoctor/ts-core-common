@@ -200,6 +200,13 @@ export class MathUtil {
         return MathUtil.toString(MathUtil.new(value).abs());
     }
 
+    public static percent(value: string, percent: MathValue): string {
+        if (MathUtil.isInvalid(value)) {
+            return null;
+        }
+        return MathUtil.multiply(percent.toString(), MathUtil.divide(value, '100'));
+    }
+
     // --------------------------------------------------------------------------
     //
     // 	Compare Methods
