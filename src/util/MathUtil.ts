@@ -207,7 +207,6 @@ export class MathUtil {
         return MathUtil.multiply(percent.toString(), MathUtil.divide(value, '100'));
     }
 
-    
     // --------------------------------------------------------------------------
     //
     // 	Compare Methods
