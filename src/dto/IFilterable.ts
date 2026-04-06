@@ -62,6 +62,7 @@ export interface IFilterableCondition<T = any> {
     value: IFilterableConditionValue<T>;
     condition: FilterableConditionType;
 
+    path?: string;
     type?: FilterableDataType;
     union?: FilterableConditionUnion;
 }
