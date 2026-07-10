@@ -52,7 +52,6 @@ export abstract class Loadable<U = any, V = any> extends DestroyableContainer {
         super.destroy();
 
         this.observer.complete();
-        this.observer = null;
     }
 
     // --------------------------------------------------------------------------

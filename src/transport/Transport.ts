@@ -197,7 +197,6 @@ export abstract class Transport<S extends ITransportSettings = ITransportSetting
 
         if (!_.isNil(this.observer)) {
             this.observer.complete();
-            this.observer = null;
         }
 
         if (!_.isNil(this.promises)) {

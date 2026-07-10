@@ -1,6 +1,5 @@
 import { Observable, Subject } from 'rxjs';
 import { IDestroyable } from './IDestroyable';
-import * as _ from 'lodash';
 
 export class Destroyable implements IDestroyable {
     // --------------------------------------------------------------------------
@@ -38,7 +37,6 @@ export class Destroyable implements IDestroyable {
 
         this._destroyed.next();
         this._destroyed.complete();
-        this._destroyed = null;
     }
 
     public ngOnDestroy(): void {
@@ -52,7 +50,7 @@ export class Destroyable implements IDestroyable {
     // --------------------------------------------------------------------------
 
     public get destroyed(): Observable<void> {
-        return !_.isNil(this._destroyed) ? this._destroyed.asObservable() : null;
+        return this._destroyed.asObservable();
     }
 
     public get isDestroyed(): boolean {
