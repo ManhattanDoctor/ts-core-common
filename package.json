@@ -1,6 +1,6 @@
 {
     "name": "@ts-core/common",
-    "version": "3.0.72",
+    "version": "3.0.73",
     "description": "Foundation TypeScript library for backend and frontend applications: reactive collections, filterable DTOs, command/event transport, logging, validation and cryptography",
     "main": "./cjs/public-api.js",
     "module": "./esm/public-api.js",
