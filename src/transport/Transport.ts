@@ -22,6 +22,12 @@ export abstract class Transport<S extends ITransportSettings = ITransportSetting
     public static DEFAULT_WAIT_DELAY = TransportCommandWaitDelay.NORMAL;
     public static DEFAULT_WAIT_MAX_COUNT = 3;
 
+    public static DEFAULT_OPTIONS: ITransportCommandOptions = {
+        timeout: Transport.DEFAULT_TIMEOUT,
+        waitDelay: Transport.DEFAULT_WAIT_DELAY,
+        waitMax: Transport.DEFAULT_WAIT_MAX_COUNT,
+    };
+
     // --------------------------------------------------------------------------
     //
     //  Static Methods
@@ -32,14 +38,10 @@ export abstract class Transport<S extends ITransportSettings = ITransportSetting
         if (_.isNil(item)) {
             return;
         }
-        if (_.isNil(item.timeout)) {
-            item.timeout = Transport.DEFAULT_TIMEOUT;
-        }
-        if (_.isNil(item.waitDelay)) {
-            item.waitDelay = Transport.DEFAULT_WAIT_DELAY;
-        }
-        if (_.isNil(item.waitMax)) {
-            item.waitMax = Transport.DEFAULT_WAIT_MAX_COUNT;
+        for (let [key, value] of Object.entries(Transport.DEFAULT_OPTIONS)) {
+            if (_.isNil(item[key])) {
+                item[key] = value;
+            }
         }
     }
 
@@ -47,14 +49,10 @@ export abstract class Transport<S extends ITransportSettings = ITransportSetting
         if (_.isNil(item)) {
             return;
         }
-        if (item.timeout === Transport.DEFAULT_TIMEOUT) {
-            delete item.timeout;
-        }
-        if (item.waitDelay === Transport.DEFAULT_WAIT_DELAY) {
-            delete item.waitDelay;
-        }
-        if (item.waitMax === Transport.DEFAULT_WAIT_MAX_COUNT) {
-            delete item.waitMax;
+        for (let [key, value] of Object.entries(Transport.DEFAULT_OPTIONS)) {
+            if (item[key] === value) {
+                delete item[key];
+            }
         }
     }
 
