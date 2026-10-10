@@ -15,7 +15,7 @@ export class TransportCommandOptions implements ITransportCommandOptions {
 
     @IsOptional()
     @IsNumber()
-    public waitMaxCount?: number;
+    public waitMax?: number;
 
     @IsOptional()
     @IsEnum(TransportCommandWaitDelay)
